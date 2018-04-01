@@ -1,3 +1,7 @@
+plugins {
+  id "com.jfrog.bintray" version "1.8.0"
+}
+
 apply plugin: 'java-gradle-plugin'
 apply plugin: 'maven-publish'
 
@@ -53,3 +57,30 @@ publishing {
     }
   }
   
+// === BINTRAY === >
+
+bintray {
+    user = findProperty('BINTRAY_USER') ?: 'NONE'
+    key = findProperty('BINTRAY_KEY') ?: 'NONE'
+
+    configurations = ['archives']
+
+    dryRun = false //[Default: false] Whether to run this as dry-run, without deploying
+    publish = false //[Default: false] Whether version should be auto published after an upload    
+    override = false //[Default: false] Whether to override version artifacts already published    
+
+    pkg {
+        repo = project.repo
+        name = project.group
+        userOrg = findProperty('BINTRAY_USER_ORG') ?: 'NONE'
+        licenses = ['Apache-2.0']
+        vcsUrl = project.scm
+
+	    version {
+	        name = project.version
+	        desc = project.name+version
+	        released  = new Date()
+	        vcsTag = project.version
+	    }
+    }
+}
