@@ -17,7 +17,7 @@ dependencies {
     def mainClass          = "${artifactGroup}.${artifactName}" 
     
     ext.moduleName     = artifactGroup 
-    ext.scm            = 'https://gitlab.com/xzel23/JPMSGradlePlugin.git'
+    ext.scm            = 'https://github.com/xzel23/JpmsGradlePlugin'
     ext.repo           = 'public'
     ext.description    = 'JPMS gradle plugin'
     
