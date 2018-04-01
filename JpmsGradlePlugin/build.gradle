@@ -1,0 +1,55 @@
+apply plugin: 'java-gradle-plugin'
+apply plugin: 'maven-publish'
+
+repositories {
+    jcenter()
+}
+
+dependencies {
+  compile localGroovy()
+  compile gradleApi()
+}
+
+/////////////////////////////////////////////////////////////////////////////
+    def artifactGroup      = 'com.dua3.gradle.jpms'
+    def artifactVersion    = '0.1'
+    def artifactName       = 'JpmsGradlePlugin'
+    def mainClass          = "${artifactGroup}.${artifactName}" 
+    
+    ext.moduleName     = artifactGroup 
+    ext.scm            = 'https://gitlab.com/xzel23/JPMSGradlePlugin.git'
+    ext.repo           = 'public'
+    ext.description    = 'JPMS gradle plugin'
+    
+    ext.developerId    = 'xzel23'
+    ext.developerName  = 'Axel Howind'
+    ext.developerEmail = 'axel@dua3.com'
+/////////////////////////////////////////////////////////////////////////////
+
+project.group = artifactGroup
+    
+gradlePlugin {
+    plugins {
+      JpmsGradlePlugin {
+        id = artifactGroup
+        implementationClass = mainClass
+      }
+    }
+}
+
+sourceCompatibility = 8
+targetCompatibility = 8
+
+// === MAVEN publication === >
+
+publishing {
+    publications {
+      pluginPublication (MavenPublication) {
+        from            components.java
+        groupId         artifactGroup
+        artifactId      artifactName
+        version         artifactVersion         
+      }
+    }
+  }
+  
