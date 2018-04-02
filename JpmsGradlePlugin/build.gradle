@@ -31,7 +31,8 @@ dependencies {
 /////////////////////////////////////////////////////////////////////////////
 
 project.group = artifactGroup
-    
+project.version = artifactVersion
+
 gradlePlugin {
     plugins {
       JpmsGradlePlugin {
