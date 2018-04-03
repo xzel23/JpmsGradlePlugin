@@ -104,11 +104,14 @@ public class CompileModuleInfoJava extends DefaultTask {
 
                     for (Task task: project.getTasksByName("assemble", false)) {
                         JpmsGradlePlugin.trace("%s dependsOn %s", task, t_module);
-                    	task.dependsOn(t_module);
+                    	task.doFirst(t -> t_module.execute());
                     }
 
                     JpmsGradlePlugin.trace("removing module-info.java from sourceset %s", name);
                     sst.getJava().exclude("**/module-info.java");
+
+                    JpmsGradlePlugin.trace("adding compiled module info to output of sourceset %s", name);
+                    sst.getOutput().plus(t_module.getOutputs().getFiles());
                 }
             }
         }

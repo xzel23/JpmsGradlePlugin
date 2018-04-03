@@ -3,6 +3,7 @@ plugins {
 }
 
 apply plugin: 'java-gradle-plugin'
+apply plugin: 'maven'
 apply plugin: 'maven-publish'
 
 repositories {
@@ -16,7 +17,7 @@ dependencies {
 
 /////////////////////////////////////////////////////////////////////////////
     def artifactGroup      = 'com.dua3.gradle.jpms'
-    def artifactVersion    = '0.1'
+    def artifactVersion    = '0.1.1'
     def artifactName       = 'JpmsGradlePlugin'
     def mainClass          = "${artifactGroup}.${artifactName}" 
     
@@ -42,8 +43,8 @@ gradlePlugin {
     }
 }
 
-sourceCompatibility = 8
-targetCompatibility = 8
+sourceCompatibility = 9
+targetCompatibility = 9
 
 // === MAVEN publication === >
 
@@ -68,7 +69,7 @@ bintray {
 
     dryRun = false //[Default: false] Whether to run this as dry-run, without deploying
     publish = false //[Default: false] Whether version should be auto published after an upload    
-    override = false //[Default: false] Whether to override version artifacts already published    
+    override = true //[Default: false] Whether to override version artifacts already published    
 
     pkg {
         repo = project.repo
