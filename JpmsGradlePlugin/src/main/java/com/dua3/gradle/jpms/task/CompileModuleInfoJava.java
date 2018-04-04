@@ -78,12 +78,16 @@ public class CompileModuleInfoJava extends DefaultTask {
         		
                 // at last, compile the module definition with Java 9 compatibility
         		task.doLast(t -> {
+        			if (moduleDefs.isEmpty()) {
+                        JpmsGradlePlugin.trace("task has no module def");
+        				return;
+        			}
+        			
                     JpmsGradlePlugin.trace("compiling module definitions for task");
 
                     // define directories
                     String classesDir = t.getOutputs().getFiles().getSingleFile().getPath();
-                    String modulepath = classesDir;
-                    
+                    String modulepath = classesDir+File.pathSeparator+task.getClasspath().getAsPath();
 					JpmsGradlePlugin.trace("module-path: %s", modulepath .replaceAll(File.pathSeparator, "\n"));
                     
 					// prepare compiler arguments
