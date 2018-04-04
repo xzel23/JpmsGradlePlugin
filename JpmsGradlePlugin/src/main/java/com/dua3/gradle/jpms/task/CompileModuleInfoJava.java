@@ -20,6 +20,7 @@ import java.io.File;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.spi.ToolProvider;
 
 import org.gradle.api.DefaultTask;
@@ -28,6 +29,7 @@ import org.gradle.api.Project;
 import org.gradle.api.file.FileCollection;
 import org.gradle.api.tasks.TaskAction;
 import org.gradle.api.tasks.compile.JavaCompile;
+import org.gradle.api.tasks.javadoc.Javadoc;
 
 import com.dua3.gradle.jpms.JpmsGradlePlugin;
 
@@ -41,6 +43,9 @@ public class CompileModuleInfoJava extends DefaultTask {
 		ToolProvider javac = ToolProvider.findFirst("javac").
 				orElseThrow(() -> new GradleException("could not get ToolProvider instance for javac."));
 
+		// Flag indicating whether module defs have to be removed from javadoc input (use AtomicBoolean because primitive cannot be set in lambda)
+		AtomicBoolean needJavadocFix = new AtomicBoolean(false);
+		
 		// iterate over all JavaCompile tasks
         project.getTasks()
         	.withType(JavaCompile.class)
@@ -48,34 +53,8 @@ public class CompileModuleInfoJava extends DefaultTask {
                 JpmsGradlePlugin.trace("%s", task);
 
                 // bail out if separate compilation is not needed for this task
-                boolean needSeparateModuleDef;
-                String targetCompatibility = task.getTargetCompatibility();
-                switch (targetCompatibility) {
-                case "1.1":
-                case "1.2":
-                case "1.3":
-                case "1.4":
-                case "1.5":
-                case "1.6":
-                case "1.7":
-                case "1.8":
-                case "1":
-                case "2":
-                case "3":
-                case "4":
-                case "5":
-                case "6":
-                case "7":
-                case "8":
-                	needSeparateModuleDef = true;
-                	break;
-                default:
-                	needSeparateModuleDef = false;
-                	break;
-                }
-                
-                if (!needSeparateModuleDef) {
-                    JpmsGradlePlugin.trace("task %s has target compatibility %s, separate compilation not needed", task, targetCompatibility);
+                if (!isSeparateCompilationOfModuleDefNeeded(task)) {
+                    JpmsGradlePlugin.trace("task %s has target compatibility %s, separate compilation not needed", task, task.getTargetCompatibility());
                     return;
                 }
                 		
@@ -88,12 +67,13 @@ public class CompileModuleInfoJava extends DefaultTask {
                 		task.getSource().filter(f -> !f.getName().equals("module-info.java"));
                 JpmsGradlePlugin.trace("other sources: %s", sources.getFiles());
 
+                // set needJavadocFix to true if needed
+                needJavadocFix.compareAndSet(false, !moduleDefs.isEmpty());
+                
                 // before executing JavaCompile task, remove module definitions from task input
         		task.doFirst(t -> {
-                    JpmsGradlePlugin.trace("removing module definitions from task input: %s", moduleDefs.getFiles());
-                    JpmsGradlePlugin.trace("before: %s", t.getInputs().getSourceFiles().getFiles());
+                    JpmsGradlePlugin.trace("removing module definitions from task input");
                     task.setSource(sources.getAsFileTree());
-                    JpmsGradlePlugin.trace("after: %s", t.getInputs().getSourceFiles().getFiles());
         		});
         		
                 // at last, compile the module definition with Java 9 compatibility
@@ -116,8 +96,67 @@ public class CompileModuleInfoJava extends DefaultTask {
 					JpmsGradlePlugin.trace("compiler arguments: %s", compilerArgs);
 					
 					// start compilation
-                    javac.run(System.out, System.err, compilerArgs.toArray(new String[0]));
+                    int rc = javac.run(System.out, System.err, compilerArgs.toArray(new String[0]));
+                    JpmsGradlePlugin.trace("compiler exit status: %d", rc);
+                    
+                    if (rc!=0) {
+                    	throw new GradleException("compilation of module definition failed, return code "+rc);
+                    }
         		});
         	});
+        
+        if (needJavadocFix.get()) {
+        	fixJavaDoc();
+        }
  	}
+
+	private static boolean isSeparateCompilationOfModuleDefNeeded(JavaCompile task) {
+		String targetCompatibility = task.getTargetCompatibility();
+		boolean needSeparateModuleDef;
+		switch (targetCompatibility) {
+		case "1.1":
+		case "1.2":
+		case "1.3":
+		case "1.4":
+		case "1.5":
+		case "1.6":
+		case "1.7":
+		case "1.8":
+		case "1":
+		case "2":
+		case "3":
+		case "4":
+		case "5":
+		case "6":
+		case "7":
+		case "8":
+			needSeparateModuleDef = true;
+			break;
+		default:
+			needSeparateModuleDef = false;
+			break;
+		}
+		return needSeparateModuleDef;
+	}
+
+	private void fixJavaDoc() {
+		Project project = getProject();
+		
+		// iterate over all JavaCompile tasks
+        project.getTasks()
+        	.withType(Javadoc.class)
+        	.forEach(task -> {
+                JpmsGradlePlugin.trace("%s", task);
+
+                FileCollection sources = 
+                		task.getSource().filter(f -> !f.getName().equals("module-info.java"));
+
+                // before executing JavaCompile task, remove module definitions from task input
+        		task.doFirst(t -> {
+        			JpmsGradlePlugin.trace("remove module def from javadoc input: %s", t);
+                    task.setSource(sources.getAsFileTree());
+        		});
+        	});
+	}
+                		
 }
