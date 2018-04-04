@@ -46,7 +46,39 @@ public class CompileModuleInfoJava extends DefaultTask {
         	.withType(JavaCompile.class)
         	.forEach(task -> {
                 JpmsGradlePlugin.trace("%s", task);
+
+                // bail out if separate compilation is not needed for this task
+                boolean needSeparateModuleDef;
+                String targetCompatibility = task.getTargetCompatibility();
+                switch (targetCompatibility) {
+                case "1.1":
+                case "1.2":
+                case "1.3":
+                case "1.4":
+                case "1.5":
+                case "1.6":
+                case "1.7":
+                case "1.8":
+                case "1":
+                case "2":
+                case "3":
+                case "4":
+                case "5":
+                case "6":
+                case "7":
+                case "8":
+                	needSeparateModuleDef = true;
+                	break;
+                default:
+                	needSeparateModuleDef = false;
+                	break;
+                }
                 
+                if (!needSeparateModuleDef) {
+                    JpmsGradlePlugin.trace("task %s has target compatibility %s, separate compilation not needed", task, targetCompatibility);
+                    return;
+                }
+                		
                 // separate module definitions from other sources
                 FileCollection moduleDefs = 
                 		task.getSource().filter(f -> f.getName().equals("module-info.java"));

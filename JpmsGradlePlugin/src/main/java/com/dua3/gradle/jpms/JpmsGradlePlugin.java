@@ -19,6 +19,7 @@ package com.dua3.gradle.jpms;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.gradle.api.JavaVersion;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 import org.gradle.api.Task;
@@ -47,6 +48,10 @@ public class JpmsGradlePlugin implements Plugin<Project>{
         }
     }
 
+    public static JavaVersion getJavaVersion() {
+    	return JavaVersion.current();
+    }
+    
     /**
      * Applies this plugin to the given Gradle project
      * @param project The Gradle project
@@ -54,10 +59,12 @@ public class JpmsGradlePlugin implements Plugin<Project>{
     public void apply(Project project) {
         trace("applying plugin %s", pluginname);
         
+        // add compileModuleInfo task
+        project.getLogger().info("Adding compileModuleInfo task to project");	
+    
         Map<String,Object> options = new HashMap<>();
         options.put("type", CompileModuleInfoJava.class);
         CompileModuleInfoJava compileModuleInfo = (CompileModuleInfoJava) project.task(options, "compileModuleInfo");
-        //compileModuleInfo.mustRunAfter("compileJava");
         
         for (Task task: project.getTasksByName("compileJava", false)) {
             trace("%s dependsOn %s", task, compileModuleInfo);
