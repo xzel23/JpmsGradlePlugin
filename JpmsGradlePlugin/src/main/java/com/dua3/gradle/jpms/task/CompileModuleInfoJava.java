@@ -17,23 +17,17 @@
 package com.dua3.gradle.jpms.task;
 
 import java.io.File;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.spi.ToolProvider;
 
 import org.gradle.api.DefaultTask;
 import org.gradle.api.GradleException;
-import org.gradle.api.JavaVersion;
 import org.gradle.api.Project;
-import org.gradle.api.Task;
 import org.gradle.api.file.FileCollection;
-import org.gradle.api.plugins.JavaPluginConvention;
-import org.gradle.api.tasks.SourceSet;
-import org.gradle.api.tasks.SourceSetContainer;
 import org.gradle.api.tasks.TaskAction;
 import org.gradle.api.tasks.compile.JavaCompile;
-import org.gradle.api.tasks.util.PatternFilterable;
 
 import com.dua3.gradle.jpms.JpmsGradlePlugin;
 
@@ -42,78 +36,56 @@ public class CompileModuleInfoJava extends DefaultTask {
 	@TaskAction
 	public void compileModuleInfoJava() {
 		Project project = getProject();
-		JavaPluginConvention javaPlugin = project.getConvention().getPlugin(JavaPluginConvention.class);
-		SourceSetContainer sourceSets = javaPlugin.getSourceSets();
 
-        for (SourceSet sst: sourceSets) {
-        	JpmsGradlePlugin.trace("sourceset: %s", sst);
+		// get the Java compiler
+		ToolProvider javac = ToolProvider.findFirst("javac").
+				orElseThrow(() -> new GradleException("could not get ToolProvider instance for javac."));
 
-            String name = sst.getName();
-            PatternFilterable patternModuleInfo = new org.gradle.api.tasks.util.PatternSet();
-            patternModuleInfo.include("**/module-info.java");
-            if (!sst.getJava().matching(patternModuleInfo).isEmpty()) {
-            	JpmsGradlePlugin.trace("%s has a module-info.java", name);
+		// iterate over all JavaCompile tasks
+        project.getTasks()
+        	.withType(JavaCompile.class)
+        	.forEach(task -> {
+                JpmsGradlePlugin.trace("%s", task);
+                
+                // separate module definitions from other sources
+                FileCollection moduleDefs = 
+                		task.getSource().filter(f -> f.getName().equals("module-info.java"));
+                JpmsGradlePlugin.trace("module definitions: %s", moduleDefs.getFiles());
+                
+                FileCollection sources = 
+                		task.getSource().filter(f -> !f.getName().equals("module-info.java"));
+                JpmsGradlePlugin.trace("other sources: %s", sources.getFiles());
 
-                // check Java version
-                if (!JavaVersion.current().isJava9Compatible()) {
-                    project.getLogger().error("At least Java 9 is needed if a module-info.java file is present.");
-                    throw new GradleException("Java 9 is needed to compile module-info.java.");
-                }
-
-                // if sourceCompatibility is < Java9, exclude module-info.java from the
-                // main sourceSet and compile it separately with compatibility set to Java9
-                if (javaPlugin.getTargetCompatibility().isJava9Compatible()) {
-                	JpmsGradlePlugin.trace("target compatibility is Java 9 or above");
-                } else {
-                    // define task names
-                    String compileModuleInfo = "compileModuleInfo_"+name;
+                // before executing JavaCompile task, remove module definitions from task input
+        		task.doFirst(t -> {
+                    JpmsGradlePlugin.trace("removing module definitions from task input: %s", moduleDefs.getFiles());
+                    JpmsGradlePlugin.trace("before: %s", t.getInputs().getSourceFiles().getFiles());
+                    task.setSource(sources.getAsFileTree());
+                    JpmsGradlePlugin.trace("after: %s", t.getInputs().getSourceFiles().getFiles());
+        		});
+        		
+                // at last, compile the module definition with Java 9 compatibility
+        		task.doLast(t -> {
+                    JpmsGradlePlugin.trace("compiling module definitions for task");
 
                     // define directories
-                    Set<File> sources = sst.getJava().getSrcDirs();
-                    File destination = sst.getOutput().getClassesDirs().getSingleFile();
-                    FileCollection classes = sst.getCompileClasspath().plus(sst.getOutput());
-                    String modulepath = classes.getAsPath()+File.pathSeparator+destination;
-
-                    JpmsGradlePlugin.trace("creating compile task for module-info.java for sourceset %s", name);
-                    Map<String,Object> options = new HashMap<>();
-                    options.put("type", JavaCompile.class);
-                    options.put("dependsOn", sst.getOutput());
-                    JavaCompile t_module = (JavaCompile) project.task(options, compileModuleInfo);
-                    t_module.doFirst(t -> {
-                    	project.getLogger().info("Compiling module-info.java in Java 9 compatibility mode for sourceset {}", name);
-
-                    	JpmsGradlePlugin.trace("module-path: %s", modulepath.replaceAll(File.pathSeparator, "\n"));
-                    	JpmsGradlePlugin.trace("class-path: %s", sst.getCompileClasspath().getAsPath().replaceAll(File.pathSeparator, "\n"));
-                        
-                        String compilerArgs[] = {
-                            "--module-path", modulepath,
-                            "--add-modules", "ALL-SYSTEM",
-                            "-d", destination.toString()
-                        };
-                        t_module.getOptions().setCompilerArgs(Arrays.asList(compilerArgs));
-                    });
-                    //inputs.property("moduleName", project.moduleName)
-
-                    t_module.setSourceCompatibility("9");
-                    t_module.setTargetCompatibility("9");
-
-                    t_module.setSource(sources);
-                    t_module.include("**/module-info.java");
-                    t_module.setClasspath(classes);
-                    t_module.setDestinationDir(destination);
-
-                    for (Task task: project.getTasksByName("assemble", false)) {
-                        JpmsGradlePlugin.trace("%s dependsOn %s", task, t_module);
-                    	task.doFirst(t -> t_module.execute());
-                    }
-
-                    JpmsGradlePlugin.trace("removing module-info.java from sourceset %s", name);
-                    sst.getJava().exclude("**/module-info.java");
-
-                    JpmsGradlePlugin.trace("adding compiled module info to output of sourceset %s", name);
-                    sst.getOutput().plus(t_module.getOutputs().getFiles());
-                }
-            }
-        }
+                    String classesDir = t.getOutputs().getFiles().getSingleFile().getPath();
+                    String modulepath = classesDir;
+                    
+					JpmsGradlePlugin.trace("module-path: %s", modulepath .replaceAll(File.pathSeparator, "\n"));
+                    
+					// prepare compiler arguments
+                    List<String> compilerArgs = new LinkedList<>();
+                    Collections.addAll(compilerArgs, "--release", "9");
+                    Collections.addAll(compilerArgs, "--module-path", modulepath);
+                    Collections.addAll(compilerArgs, "--add-modules", "ALL-SYSTEM");
+                    Collections.addAll(compilerArgs, "-d", classesDir.toString());
+                    moduleDefs.getFiles().stream().map(File::toString).forEach(compilerArgs::add);
+					JpmsGradlePlugin.trace("compiler arguments: %s", compilerArgs);
+					
+					// start compilation
+                    javac.run(System.out, System.err, compilerArgs.toArray(new String[0]));
+        		});
+        	});
  	}
 }
