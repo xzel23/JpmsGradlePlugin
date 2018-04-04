@@ -16,7 +16,11 @@
  */
 package com.dua3.gradle.jpms.task;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
@@ -100,9 +104,16 @@ public class CompileModuleInfoJava extends DefaultTask {
 					JpmsGradlePlugin.trace("compiler arguments: %s", compilerArgs);
 					
 					// start compilation
-                    int rc = javac.run(System.out, System.err, compilerArgs.toArray(new String[0]));
-                    JpmsGradlePlugin.trace("compiler exit status: %d", rc);
+					ByteArrayOutputStream out = new ByteArrayOutputStream();
+					int rc = javac.run(new PrintWriter(out, true), new PrintWriter(out, true), compilerArgs.toArray(new String[0]));
+
+					try {
+						JpmsGradlePlugin.trace("javac output:\n%s", out.toString(StandardCharsets.UTF_8.name()));
+					} catch (UnsupportedEncodingException e) {
+						project.getLogger().warn("Exception while preparing trace output", e);
+					}
                     
+					JpmsGradlePlugin.trace("compiler exit status: %d", rc);
                     if (rc!=0) {
                     	throw new GradleException("compilation of module definition failed, return code "+rc);
                     }
