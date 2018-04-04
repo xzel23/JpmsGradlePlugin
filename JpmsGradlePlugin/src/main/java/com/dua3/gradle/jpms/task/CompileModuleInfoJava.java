@@ -108,15 +108,21 @@ public class CompileModuleInfoJava extends DefaultTask {
 					int rc = javac.run(new PrintWriter(out, true), new PrintWriter(out, true), compilerArgs.toArray(new String[0]));
 
 					try {
-						JpmsGradlePlugin.trace("javac output:\n%s", out.toString(StandardCharsets.UTF_8.name()));
+						String compilerOutput = out.toString(StandardCharsets.UTF_8.name());
+
+						if (rc!=0) {
+							System.err.println(compilerOutput);
+	                    	String msg = "compilation of module definition failed, return code "+rc;
+	                    	project.getLogger().error(msg);
+							throw new GradleException(msg);
+	                    }
+
+	                    JpmsGradlePlugin.trace("javac output:\n%s", compilerOutput);
 					} catch (UnsupportedEncodingException e) {
-						project.getLogger().warn("Exception while preparing trace output", e);
-					}
-                    
-					JpmsGradlePlugin.trace("compiler exit status: %d", rc);
-                    if (rc!=0) {
-                    	throw new GradleException("compilation of module definition failed, return code "+rc);
-                    }
+						project.getLogger().warn("exception retrieving compiler output.", e);
+					} finally {
+						JpmsGradlePlugin.trace("compiler exit status: %d", rc);
+					}                    
         		});
         	});
         
