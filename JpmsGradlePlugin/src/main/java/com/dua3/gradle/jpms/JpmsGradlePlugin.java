@@ -26,6 +26,7 @@ import org.gradle.api.Task;
 import org.gradle.api.tasks.Internal;
 
 import com.dua3.gradle.jpms.task.CompileModuleInfoJava;
+import com.dua3.gradle.jpms.task.JLink;
 
 public class JpmsGradlePlugin implements Plugin<Project>{
 
@@ -51,24 +52,37 @@ public class JpmsGradlePlugin implements Plugin<Project>{
     public static JavaVersion getJavaVersion() {
     	return JavaVersion.current();
     }
-    
+
     /**
      * Applies this plugin to the given Gradle project
      * @param project The Gradle project
      */
+    @Override
     public void apply(Project project) {
         trace("applying plugin %s", pluginname);
-        
+
         // add compileModuleInfo task
-        project.getLogger().info("Adding compileModuleInfo task to project");	
-    
-        Map<String,Object> options = new HashMap<>();
-        options.put("type", CompileModuleInfoJava.class);
-        CompileModuleInfoJava compileModuleInfo = (CompileModuleInfoJava) project.task(options, "compileModuleInfo");
-        
+        project.getLogger().info("Adding compileModuleInfo task to project");
+
+        Map<String,Object> optionsCompileModuleInfo = new HashMap<>();
+        optionsCompileModuleInfo.put("type", CompileModuleInfoJava.class);
+        CompileModuleInfoJava compileModuleInfo = (CompileModuleInfoJava) project.task(optionsCompileModuleInfo, "compileModuleInfo");
+
         for (Task task: project.getTasksByName("compileJava", false)) {
             trace("%s dependsOn %s", task, compileModuleInfo);
         	task.dependsOn(compileModuleInfo);
         }
+
+        // add 'jlink' extension
+        project.getLogger().info("Adding jlink task to project");
+
+        trace("creating jlink extension");
+        project.getExtensions().create("jlink", JpmsGradlePluginJLinkExtension.class);
+
+        trace("creating jlink task");
+        Map<String,Object> optionsJLink = new HashMap<>();
+        optionsJLink.put("type", JLink.class);
+        JLink jlink = (JLink) project.task(optionsJLink, "jlink");
+        jlink.dependsOn("build");
     }
 }

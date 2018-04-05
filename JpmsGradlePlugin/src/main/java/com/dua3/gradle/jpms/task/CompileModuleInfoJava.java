@@ -16,11 +16,7 @@
  */
 package com.dua3.gradle.jpms.task;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.PrintWriter;
-import java.io.UnsupportedEncodingException;
-import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
@@ -38,7 +34,7 @@ import org.gradle.api.tasks.javadoc.Javadoc;
 import com.dua3.gradle.jpms.JpmsGradlePlugin;
 
 public class CompileModuleInfoJava extends DefaultTask {
-	
+
 	@TaskAction
 	public void compileModuleInfoJava() {
 		Project project = getProject();
@@ -49,7 +45,7 @@ public class CompileModuleInfoJava extends DefaultTask {
 
 		// Flag indicating whether module defs have to be removed from javadoc input (use AtomicBoolean because primitive cannot be set in lambda)
 		AtomicBoolean needJavadocFix = new AtomicBoolean(false);
-		
+
 		// iterate over all JavaCompile tasks
         project.getTasks()
         	.withType(JavaCompile.class)
@@ -61,39 +57,39 @@ public class CompileModuleInfoJava extends DefaultTask {
                     JpmsGradlePlugin.trace("task %s has target compatibility %s, separate compilation not needed", task, task.getTargetCompatibility());
                     return;
                 }
-                		
+
                 // separate module definitions from other sources
-                FileCollection moduleDefs = 
+                FileCollection moduleDefs =
                 		task.getSource().filter(f -> f.getName().equals("module-info.java"));
                 JpmsGradlePlugin.trace("module definitions: %s", moduleDefs.getFiles());
-                
-                FileCollection sources = 
+
+                FileCollection sources =
                 		task.getSource().filter(f -> !f.getName().equals("module-info.java"));
                 JpmsGradlePlugin.trace("other sources: %s", sources.getFiles());
 
                 // set needJavadocFix to true if needed
                 needJavadocFix.compareAndSet(false, !moduleDefs.isEmpty());
-                
+
                 // before executing JavaCompile task, remove module definitions from task input
         		task.doFirst(t -> {
                     JpmsGradlePlugin.trace("removing module definitions from task input");
                     task.setSource(sources.getAsFileTree());
         		});
-        		
+
                 // at last, compile the module definition with Java 9 compatibility
         		task.doLast(t -> {
         			if (moduleDefs.isEmpty()) {
                         JpmsGradlePlugin.trace("task has no module def");
         				return;
         			}
-        			
+
                     JpmsGradlePlugin.trace("compiling module definitions for task");
 
                     // define directories
                     String classesDir = t.getOutputs().getFiles().getSingleFile().getPath();
                     String modulepath = classesDir+File.pathSeparator+task.getClasspath().getAsPath();
 					JpmsGradlePlugin.trace("module-path: %s", modulepath .replaceAll(File.pathSeparator, "\n"));
-                    
+
 					// prepare compiler arguments
                     List<String> compilerArgs = new LinkedList<>();
                     Collections.addAll(compilerArgs, "--release", "9");
@@ -102,30 +98,12 @@ public class CompileModuleInfoJava extends DefaultTask {
                     Collections.addAll(compilerArgs, "-d", classesDir.toString());
                     moduleDefs.getFiles().stream().map(File::toString).forEach(compilerArgs::add);
 					JpmsGradlePlugin.trace("compiler arguments: %s", compilerArgs);
-					
+
 					// start compilation
-					ByteArrayOutputStream out = new ByteArrayOutputStream();
-					int rc = javac.run(new PrintWriter(out, true), new PrintWriter(out, true), compilerArgs.toArray(new String[0]));
-
-					try {
-						String compilerOutput = out.toString(StandardCharsets.UTF_8.name());
-
-						if (rc!=0) {
-							System.err.println(compilerOutput);
-	                    	String msg = "compilation of module definition failed, return code "+rc;
-	                    	project.getLogger().error(msg);
-							throw new GradleException(msg);
-	                    }
-
-	                    JpmsGradlePlugin.trace("javac output:\n%s", compilerOutput);
-					} catch (UnsupportedEncodingException e) {
-						project.getLogger().warn("exception retrieving compiler output.", e);
-					} finally {
-						JpmsGradlePlugin.trace("compiler exit status: %d", rc);
-					}                    
+					TaskHelper.runTool(javac, project, compilerArgs);
         		});
         	});
-        
+
         if (needJavadocFix.get()) {
         	fixJavaDoc();
         }
@@ -162,14 +140,14 @@ public class CompileModuleInfoJava extends DefaultTask {
 
 	private void fixJavaDoc() {
 		Project project = getProject();
-		
+
 		// iterate over all JavaCompile tasks
         project.getTasks()
         	.withType(Javadoc.class)
         	.forEach(task -> {
                 JpmsGradlePlugin.trace("%s", task);
 
-                FileCollection sources = 
+                FileCollection sources =
                 		task.getSource().filter(f -> !f.getName().equals("module-info.java"));
 
                 // before executing JavaCompile task, remove module definitions from task input
@@ -179,5 +157,5 @@ public class CompileModuleInfoJava extends DefaultTask {
         		});
         	});
 	}
-                		
+
 }
