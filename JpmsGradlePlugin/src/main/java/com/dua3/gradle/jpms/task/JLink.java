@@ -1,12 +1,14 @@
 package com.dua3.gradle.jpms.task;
 
 import java.io.File;
+import java.net.URL;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.spi.ToolProvider;
 import java.util.stream.Collectors;
 
+import org.apache.tools.ant.taskdefs.optional.jlink.JlinkTask;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.GradleException;
 import org.gradle.api.Project;
@@ -31,12 +33,15 @@ public class JLink extends DefaultTask {
 				.orElseThrow(() -> new GradleException("could not get an instance of the jlink tool."));
 
 		JpmsGradlePluginJLinkExtension extension = (JpmsGradlePluginJLinkExtension) project.getExtensions().getByName("jlink");
-
+		
 		// setup module path - 1. collect all generated jars
 		String projectModulePath = project.getTasks()
 		    .withType(Jar.class)
 		    .stream()
-		    .filter(t -> !t.getClassifier().equalsIgnoreCase("javadoc"))
+		    .filter(t 
+		    		-> !t.getClassifier().equalsIgnoreCase("javadoc") 
+		    		&& !t.getClassifier().equalsIgnoreCase("src") 
+		    		&& !t.getClassifier().equalsIgnoreCase("sources"))
 		    .map(Task::getOutputs)
 		    .map(TaskOutputs::getFiles)
 		    .map(FileCollection::getAsPath)
@@ -48,10 +53,14 @@ public class JLink extends DefaultTask {
 		    .getAsPath();
 
         // setup module path - 3. tthe JDK modules
-		String jmods = "jmods";
+		String jmods = System.getProperties().getProperty("java.home")+File.separator+"jmods";
 
+		// setup module path - putting it all together
         String modulePath = String.join(File.pathSeparator, projectModulePath, dependendyModulePath, jmods);
 
+        // output folder
+        String output = project.getBuildDir().getAbsolutePath()+File.separator+"dist";
+        		
 		// prepare jlink arguments - see jlink documentation
 		String launcher = String.format("%s=%s/%s", extension.getApplication(), extension.getModule(), extension.getMain());
 
@@ -60,7 +69,7 @@ public class JLink extends DefaultTask {
 		Collections.addAll(jlinkArgs, "--module-path", modulePath);
 		Collections.addAll(jlinkArgs, "--add-modules", extension.getModule());
 		Collections.addAll(jlinkArgs, "--launcher", launcher);
-		Collections.addAll(jlinkArgs, "--output", "dist");
+		Collections.addAll(jlinkArgs, "--output", output);
 
 		// compression
 		Collections.addAll(jlinkArgs, "--compress", String.valueOf(extension.getCompress()));
