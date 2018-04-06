@@ -71,9 +71,7 @@ public class ModuleInfoJava extends DefaultTask {
                 JpmsGradlePlugin.trace("other sources: %s", sources.getFiles());
 
                 // set needJavadocFix to true if needed
-                if (!extension.isMultiRelease()) {
-                    needJavadocFix.compareAndSet(false, !moduleDefs.isEmpty());
-                }
+                needJavadocFix.compareAndSet(false, !moduleDefs.isEmpty());
 
                 // before executing JavaCompile task, remove module definitions from task input
         		task.doFirst(t -> {
