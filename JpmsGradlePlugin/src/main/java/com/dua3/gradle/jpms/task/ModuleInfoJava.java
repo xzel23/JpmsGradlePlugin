@@ -28,16 +28,19 @@ import org.gradle.api.GradleException;
 import org.gradle.api.Project;
 import org.gradle.api.file.FileCollection;
 import org.gradle.api.tasks.TaskAction;
+import org.gradle.api.tasks.bundling.Jar;
 import org.gradle.api.tasks.compile.JavaCompile;
 import org.gradle.api.tasks.javadoc.Javadoc;
 
 import com.dua3.gradle.jpms.JpmsGradlePlugin;
 
-public class CompileModuleInfoJava extends DefaultTask {
+public class ModuleInfoJava extends DefaultTask {
 
 	@TaskAction
 	public void compileModuleInfoJava() {
 		Project project = getProject();
+
+        ModuleInfoExtension extension = (ModuleInfoExtension) project.getExtensions().getByName("moduleInfo");
 
 		// get the Java compiler
 		ToolProvider javac = ToolProvider.findFirst("javac").
@@ -68,7 +71,9 @@ public class CompileModuleInfoJava extends DefaultTask {
                 JpmsGradlePlugin.trace("other sources: %s", sources.getFiles());
 
                 // set needJavadocFix to true if needed
-                needJavadocFix.compareAndSet(false, !moduleDefs.isEmpty());
+                if (!extension.isMultiRelease()) {
+                    needJavadocFix.compareAndSet(false, !moduleDefs.isEmpty());
+                }
 
                 // before executing JavaCompile task, remove module definitions from task input
         		task.doFirst(t -> {
@@ -104,10 +109,18 @@ public class CompileModuleInfoJava extends DefaultTask {
         		});
         	});
 
+        // fix Javadoc inputs (because javadoc will throw an exception for module definitions in Java 8 compatibility)
         if (needJavadocFix.get()) {
+            JpmsGradlePlugin.trace("fixing javadoc");
         	fixJavaDoc();
         }
- 	}
+
+        // if target is a multi-release jar, move module definitions into the corresponding subfolder
+        if (extension.isMultiRelease()) {
+            JpmsGradlePlugin.trace("creating multi-release jar");
+            multiReleaseJar();
+        }
+    }
 
 	private static boolean isSeparateCompilationOfModuleDefNeeded(JavaCompile task) {
 		String targetCompatibility = task.getTargetCompatibility();
@@ -147,15 +160,33 @@ public class CompileModuleInfoJava extends DefaultTask {
         	.forEach(task -> {
                 JpmsGradlePlugin.trace("%s", task);
 
-                FileCollection sources =
+                FileCollection inputs =
                 		task.getSource().filter(f -> !f.getName().equals("module-info.java"));
 
                 // before executing JavaCompile task, remove module definitions from task input
         		task.doFirst(t -> {
         			JpmsGradlePlugin.trace("remove module def from javadoc input: %s", t);
-                    task.setSource(sources.getAsFileTree());
+                    task.setSource(inputs.getAsFileTree());
         		});
         	});
 	}
 
+	private void multiReleaseJar() {
+        Project project = getProject();
+
+        // iterate over all Jar tasks
+        project.getTasks()
+            .withType(Jar.class)
+            .forEach(task -> {
+                JpmsGradlePlugin.trace("%s", task);
+
+                JpmsGradlePlugin.trace("Setting Multi-Release attribute in manifest");
+                task.getManifest().getAttributes().put("Multi-Release", "true");
+
+                JpmsGradlePlugin.trace("Fixing paths of module definitions");
+                task.filesMatching("module-info.class", fileCopyDetails -> {
+                    fileCopyDetails.setPath("META-INF/versions/9/"+fileCopyDetails.getName());
+                });
+            });
+	}
 }

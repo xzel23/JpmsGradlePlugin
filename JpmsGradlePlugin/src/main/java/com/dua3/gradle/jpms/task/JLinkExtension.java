@@ -1,6 +1,6 @@
-package com.dua3.gradle.jpms;
+package com.dua3.gradle.jpms.task;
 
-public class JpmsGradlePluginJLinkExtension {
+public class JLinkExtension {
 
     /** The root module containing the main class. */
     private String module = "";

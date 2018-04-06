@@ -25,8 +25,10 @@ import org.gradle.api.Project;
 import org.gradle.api.Task;
 import org.gradle.api.tasks.Internal;
 
-import com.dua3.gradle.jpms.task.CompileModuleInfoJava;
+import com.dua3.gradle.jpms.task.ModuleInfoJava;
 import com.dua3.gradle.jpms.task.JLink;
+import com.dua3.gradle.jpms.task.JLinkExtension;
+import com.dua3.gradle.jpms.task.ModuleInfoExtension;
 
 public class JpmsGradlePlugin implements Plugin<Project>{
 
@@ -61,23 +63,26 @@ public class JpmsGradlePlugin implements Plugin<Project>{
     public void apply(Project project) {
         trace("applying plugin %s", pluginname);
 
-        // add compileModuleInfo task
-        project.getLogger().info("Adding compileModuleInfo task to project");
+        // create and automatically add moduleInfo task
+        project.getLogger().info("Adding moduleInfo task to project");
 
-        Map<String,Object> optionsCompileModuleInfo = new HashMap<>();
-        optionsCompileModuleInfo.put("type", CompileModuleInfoJava.class);
-        CompileModuleInfoJava compileModuleInfo = (CompileModuleInfoJava) project.task(optionsCompileModuleInfo, "compileModuleInfo");
+        trace("creating moduleInfo extension");
+        project.getExtensions().create("moduleInfo", ModuleInfoExtension.class);
+
+        Map<String,Object> optionsModuleInfo = new HashMap<>();
+        optionsModuleInfo.put("type", ModuleInfoJava.class);
+        ModuleInfoJava moduleInfo = (ModuleInfoJava) project.task(optionsModuleInfo, "moduleInfo");
 
         for (Task task: project.getTasksByName("compileJava", false)) {
-            trace("%s dependsOn %s", task, compileModuleInfo);
-        	task.dependsOn(compileModuleInfo);
+            trace("%s dependsOn %s", task, moduleInfo);
+        	task.dependsOn(moduleInfo);
         }
 
-        // add 'jlink' extension
+        // add 'jlink' task
         project.getLogger().info("Adding jlink task to project");
 
         trace("creating jlink extension");
-        project.getExtensions().create("jlink", JpmsGradlePluginJLinkExtension.class);
+        project.getExtensions().create("jlink", JLinkExtension.class);
 
         trace("creating jlink task");
         Map<String,Object> optionsJLink = new HashMap<>();
