@@ -47,7 +47,7 @@ public class JLink extends DefaultTask {
 		    .getByName("runtime")
 		    .getAsPath();
 
-        // setup module path - 3. tthe JDK modules
+        // setup module path - 3. the JDK modules
 		String jmods = System.getProperties().getProperty("java.home")+File.separator+"jmods";
 
 		// setup module path - putting it all together
