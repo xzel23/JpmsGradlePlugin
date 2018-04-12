@@ -6,6 +6,8 @@ public class JLinkExtension {
     private String module = "";
     /** The fully qualified main class. */
     private String main = "";
+    /** List of other modules to add, separated by comma. */
+    private String addModules = "";
     /** The application name to use. */
     private String application = "";
     /** The compression level. */
@@ -27,6 +29,14 @@ public class JLinkExtension {
 
     public void setMain(String main) {
         this.main = main;
+    }
+
+    public String getAddModules() {
+        return addModules;
+    }
+
+    public void setAddModules(String addModules) {
+        this.addModules = addModules;
     }
 
     public String getApplication() {

@@ -47,7 +47,7 @@ public class JLink extends DefaultTask {
 		    .getByName("runtime")
 		    .getAsPath();
 
-        // setup module path - 3. tthe JDK modules
+        // setup module path - 3. the JDK modules
 		String jmods = System.getProperties().getProperty("java.home")+File.separator+"jmods";
 
 		// setup module path - putting it all together
@@ -59,10 +59,24 @@ public class JLink extends DefaultTask {
 		// prepare jlink arguments - see jlink documentation
 		String launcher = String.format("%s=%s/%s", extension.getApplication(), extension.getModule(), extension.getMain());
 
+		// list of modules to include
+		String addModules = extension.getAddModules();
+		String rootModule = extension.getModule();
 
+		if (rootModule.isEmpty()) {
+		    throw new GradleException("root module is not set (buid.gradle: jlink.module=module.containing.mainclass)");
+		}
+
+		if (addModules.isEmpty()) {
+		    addModules = rootModule;
+		} else {
+		    addModules = rootModule + "," + addModules;
+		}
+
+		// jlink arguments
 		List<String> jlinkArgs = new LinkedList<>();
 		Collections.addAll(jlinkArgs, "--module-path", modulePath);
-		Collections.addAll(jlinkArgs, "--add-modules", extension.getModule());
+		Collections.addAll(jlinkArgs, "--add-modules", addModules);
 		Collections.addAll(jlinkArgs, "--launcher", launcher);
 		Collections.addAll(jlinkArgs, "--output", output);
 
