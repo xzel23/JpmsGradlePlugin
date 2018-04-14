@@ -97,7 +97,7 @@ public class ModuleInfoJava extends DefaultTask {
                     List<String> compilerArgs = new LinkedList<>();
                     Collections.addAll(compilerArgs, "--release", "9");
                     Collections.addAll(compilerArgs, "--module-path", modulepath);
-                    Collections.addAll(compilerArgs, "--add-modules", "ALL-SYSTEM");
+//                    Collections.addAll(compilerArgs, "--add-modules", "ALL-SYSTEM");
                     Collections.addAll(compilerArgs, "-d", classesDir.toString());
                     moduleDefs.getFiles().stream().map(File::toString).forEach(compilerArgs::add);
 					JpmsGradlePlugin.trace("compiler arguments: %s", compilerArgs);
