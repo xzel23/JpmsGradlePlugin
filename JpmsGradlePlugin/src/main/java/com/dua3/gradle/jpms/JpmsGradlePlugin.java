@@ -86,17 +86,20 @@ public class JpmsGradlePlugin implements Plugin<Project>{
         project.getTasks()
     	.withType(JavaCompile.class)
     	.stream()
-    	.filter(task -> JavaVersion.toVersion(task.getTargetCompatibility()).isJava9Compatible())
         .forEach(task -> task.doFirst(t -> {
-            trace("moving entries from classpath to modulepath for task %s", task);
-        	CompileOptions options = task.getOptions();
-        	List<String> compilerArgs = new ArrayList<>(options.getAllCompilerArgs());
-        	compilerArgs.add("--module-path");
-        	compilerArgs.add(task.getClasspath().getAsPath());
-        	options.setCompilerArgs(compilerArgs);
-        	task.setClasspath(project.files());
+    		JavaVersion version = JavaVersion.toVersion(task.getTargetCompatibility());
+    		trace("task %s, target compatibility: %s", task, version);
+    		
+    		if (version.isJava9Compatible()) {
+	            trace("moving entries from classpath to modulepath for task %s", task);
+	        	CompileOptions options = task.getOptions();
+	        	List<String> compilerArgs = new ArrayList<>(options.getAllCompilerArgs());
+	        	compilerArgs.add("--module-path");
+	        	compilerArgs.add(task.getClasspath().getAsPath());
+	        	options.setCompilerArgs(compilerArgs);
+	        	task.setClasspath(project.files());
+    		}
         }));
-        
         
         // add 'jlink' task
         project.getLogger().info("Adding jlink task to project");
