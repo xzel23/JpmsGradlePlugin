@@ -18,12 +18,16 @@ package com.dua3.gradle.jpms;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.List;
+import java.util.ArrayList;
 
 import org.gradle.api.JavaVersion;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 import org.gradle.api.Task;
 import org.gradle.api.tasks.Internal;
+import org.gradle.api.tasks.compile.CompileOptions;
+import org.gradle.api.tasks.compile.JavaCompile;
 
 import com.dua3.gradle.jpms.task.ModuleInfoJava;
 import com.dua3.gradle.jpms.task.JLink;
@@ -78,6 +82,22 @@ public class JpmsGradlePlugin implements Plugin<Project>{
         	task.dependsOn(moduleInfo);
         }
 
+        // move dependencies from classpath to modulepath
+        project.getTasks()
+    	.withType(JavaCompile.class)
+    	.stream()
+    	.filter(task -> JavaVersion.toVersion(task.getTargetCompatibility()).isJava9Compatible())
+        .forEach(task -> task.doFirst(t -> {
+            trace("moving entries from classpath to modulepath for task %s", task);
+        	CompileOptions options = task.getOptions();
+        	List<String> compilerArgs = new ArrayList<>(options.getAllCompilerArgs());
+        	compilerArgs.add("--module-path");
+        	compilerArgs.add(task.getClasspath().getAsPath());
+        	options.setCompilerArgs(compilerArgs);
+        	task.setClasspath(project.files());
+        }));
+        
+        
         // add 'jlink' task
         project.getLogger().info("Adding jlink task to project");
 
