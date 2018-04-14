@@ -43,3 +43,8 @@ To create standalone applications as described in Steve Perkin's [blog](https://
         application = 'cli'
         compress = 2
     }
+
+
+## Example project
+
+Have a look at the [fxbrowser](https://github.com/xzel23/fxbrowser) project for an example on how to build a non-trivial standalone application using the plugin.
