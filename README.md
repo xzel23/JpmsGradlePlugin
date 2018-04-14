@@ -9,7 +9,7 @@ buildscript {
     maven { url  "https://dl.bintray.com/dua3/public" }
   }  
   dependencies {
-    classpath group: 'com.dua3.gradle.jpms', name: 'JpmsGradlePlugin', version: '0.2.1'
+    classpath group: 'com.dua3.gradle.jpms', name: 'JpmsGradlePlugin', version: '0.2.3'
   }
 }
 
