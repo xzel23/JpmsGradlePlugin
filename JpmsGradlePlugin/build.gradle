@@ -17,7 +17,7 @@ dependencies {
 
 /////////////////////////////////////////////////////////////////////////////
     def artifactGroup      = 'com.dua3.gradle.jpms'
-    def artifactVersion    = '0.2.3'
+    def artifactVersion    = '1.0-SNAPSHOT'
     def artifactName       = 'JpmsGradlePlugin'
     def mainClass          = "${artifactGroup}.${artifactName}" 
     
