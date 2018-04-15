@@ -25,6 +25,7 @@ import org.gradle.api.JavaVersion;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 import org.gradle.api.Task;
+import org.gradle.api.invocation.Gradle;
 import org.gradle.api.tasks.Internal;
 import org.gradle.api.tasks.compile.CompileOptions;
 import org.gradle.api.tasks.compile.JavaCompile;
@@ -65,6 +66,16 @@ public class JpmsGradlePlugin implements Plugin<Project>{
      */
     @Override
     public void apply(Project project) {
+    	Gradle gradle = project.getGradle();    	
+    	String gradleVersion = gradle.getGradleVersion();
+    	
+        trace("gradle version: %s", gradleVersion);
+        
+    	if (gradleVersion.compareTo("4.6")<0) {
+    		project.getLogger().warn("Unknown Gradle version: {}", gradleVersion);
+    		project.getLogger().warn("Plugin needs version 4.6 or above");
+    	}
+    	
         trace("applying plugin %s", pluginname);
 
         // create and automatically add moduleInfo task
