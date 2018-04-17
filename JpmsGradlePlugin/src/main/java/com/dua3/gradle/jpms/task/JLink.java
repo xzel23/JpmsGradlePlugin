@@ -29,6 +29,11 @@ public class JLink extends DefaultTask {
 
 		JLinkExtension extension = (JLinkExtension) project.getExtensions().getByName("jlink");
 
+		if (extension.getApplication().isEmpty()) {
+	        JpmsGradlePlugin.trace("task %s: jlink.application not set, ignoring", this);
+	        return;
+		}
+		
 		// setup module path - 1. collect all generated jars
 		String projectModulePath = project.getTasks()
 		    .withType(Jar.class)
