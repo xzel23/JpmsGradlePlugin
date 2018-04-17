@@ -30,7 +30,7 @@ public class JLink extends DefaultTask {
 		JLinkExtension extension = (JLinkExtension) project.getExtensions().getByName("jlink");
 
 		if (extension.getApplication().isEmpty()) {
-	        JpmsGradlePlugin.trace("task %s: jlink.application not set, ignoring", this);
+            project.getLogger().info("jlink.application not set, not executing jlink ({})", this);
 	        return;
 		}
 		
