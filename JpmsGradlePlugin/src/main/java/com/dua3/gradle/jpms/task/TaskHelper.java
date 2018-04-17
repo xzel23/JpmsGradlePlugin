@@ -15,6 +15,8 @@ import com.dua3.gradle.jpms.JpmsGradlePlugin;
 public class TaskHelper {
 
     static void runTool(ToolProvider tool, Project project, List<String> args) {
+        JpmsGradlePlugin.trace("runTool %s%n%s %s%n", tool, project, String.join(" ", args));
+        
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         int rc = tool.run(new PrintWriter(out, true), new PrintWriter(out, true), args.toArray(new String[0]));
 
