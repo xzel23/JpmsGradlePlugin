@@ -1,7 +1,14 @@
 package com.dua3.gradle.jpms.task;
 
 import java.io.File;
+import java.io.IOException;
+import java.io.UncheckedIOException;
+import java.nio.file.FileVisitOption;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.spi.ToolProvider;
@@ -61,6 +68,27 @@ public class JLink extends DefaultTask {
         // output folder
         String output = project.getBuildDir().getAbsolutePath()+File.separator+"dist";
 
+        // remove output folder if it exists
+        if (extension.isAutoClean()) {
+        	Path outputFolder = Paths.get(output);
+        	if (Files.exists(outputFolder)) {
+        		JpmsGradlePlugin.trace("removing output folder: "+outputFolder);
+	        	try {
+	    	    	Files.walk(outputFolder, FileVisitOption.FOLLOW_LINKS)
+	    	        .sorted(Comparator.reverseOrder())
+	    	        .forEach(p -> {
+	    	        	try {
+	    	        		Files.deleteIfExists(p);
+	    	        	} catch (IOException e) {
+	    	        		throw new UncheckedIOException(e);
+	    	        	}
+	    	        });
+				} catch (IOException|UncheckedIOException e) {
+					throw new GradleException("could not delete output folder", e);
+				}
+        	}
+        }
+        
 		// prepare jlink arguments - see jlink documentation
 		String launcher = String.format("%s=%s/%s", extension.getApplication(), extension.getModule(), extension.getMain());
 
