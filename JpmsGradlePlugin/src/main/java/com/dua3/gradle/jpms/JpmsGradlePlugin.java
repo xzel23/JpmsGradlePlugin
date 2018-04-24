@@ -16,24 +16,23 @@
  */
 package com.dua3.gradle.jpms;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.List;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import org.gradle.api.JavaVersion;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
-import org.gradle.api.Task;
 import org.gradle.api.invocation.Gradle;
 import org.gradle.api.tasks.Internal;
 import org.gradle.api.tasks.compile.CompileOptions;
 import org.gradle.api.tasks.compile.JavaCompile;
 
-import com.dua3.gradle.jpms.task.ModuleInfoJava;
 import com.dua3.gradle.jpms.task.JLink;
 import com.dua3.gradle.jpms.task.JLinkExtension;
 import com.dua3.gradle.jpms.task.ModuleInfoExtension;
+import com.dua3.gradle.jpms.task.ModuleInfoJava;
 
 public class JpmsGradlePlugin implements Plugin<Project>{
 
@@ -88,29 +87,31 @@ public class JpmsGradlePlugin implements Plugin<Project>{
         optionsModuleInfo.put("type", ModuleInfoJava.class);
         ModuleInfoJava moduleInfo = (ModuleInfoJava) project.task(optionsModuleInfo, "moduleInfo");
 
-        for (Task task: project.getTasksByName("compileJava", false)) {
-            trace("%s dependsOn %s", task, moduleInfo);
-        	task.dependsOn(moduleInfo);
-        }
-
-        // move dependencies from classpath to modulepath
-        project.getTasks()
-    	.withType(JavaCompile.class)
-    	.stream()
-        .forEach(task -> task.doFirst(t -> {
-    		JavaVersion version = JavaVersion.toVersion(task.getTargetCompatibility());
-    		trace("task %s, target compatibility: %s", task, version);
-    		
-    		if (version.isJava9Compatible()) {
-	            trace("moving entries from classpath to modulepath for task %s", task);
-	        	CompileOptions options = task.getOptions();
-	        	List<String> compilerArgs = new ArrayList<>(options.getAllCompilerArgs());
-	        	compilerArgs.add("--module-path");
-	        	compilerArgs.add(task.getClasspath().getAsPath());
-	        	options.setCompilerArgs(compilerArgs);
-	        	task.setClasspath(project.files());
-    		}
-        }));
+        // move dependencies from classpath to modulepath, and make sure moduleInfo executes first
+        project.afterEvaluate(p -> {
+	        p.getTasks()
+	    	.withType(JavaCompile.class)
+	    	.stream()
+	        .forEach(task -> {
+	            trace("%s dependsOn %s", task, moduleInfo);
+	        	task.dependsOn(moduleInfo);
+	        	
+		        task.doFirst(t -> {
+		    		JavaVersion version = JavaVersion.toVersion(task.getTargetCompatibility());
+		    		trace("task %s, target compatibility: %s", task, version);
+		    		
+		    		if (version.isJava9Compatible()) {
+			            trace("moving entries from classpath to modulepath for task %s", task);
+			        	CompileOptions options = task.getOptions();
+			        	List<String> compilerArgs = new ArrayList<>(options.getAllCompilerArgs());
+			        	compilerArgs.add("--module-path");
+			        	compilerArgs.add(task.getClasspath().getAsPath());
+			        	options.setCompilerArgs(compilerArgs);
+			        	task.setClasspath(p.files());
+		    		}
+		        });
+	        });
+        });
         
         // add 'jlink' task
         project.getLogger().info("Adding jlink task to project");

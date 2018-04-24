@@ -31,7 +31,7 @@ dependencies {
 
 /////////////////////////////////////////////////////////////////////////////
     def artifactGroup      = 'com.dua3.gradle.jpms'
-    def artifactVersion    = '0.3.0'
+    def artifactVersion    = '0.3.1'
     def artifactName       = 'JpmsGradlePlugin'
     def mainClass          = "${artifactGroup}.${artifactName}" 
     
@@ -57,8 +57,8 @@ gradlePlugin {
     }
 }
 
-sourceCompatibility = 8
-targetCompatibility = 8
+sourceCompatibility = 9
+targetCompatibility = 9
 
 // === MAVEN publication === >
 
@@ -79,11 +79,11 @@ pluginBundle {
   website = project.scm
   vcsUrl = project.scm
   description = 'A plugin with support for the Java Platform Module System / Project Jigsaw'
-  tags = ['jpms', 'jigsaw']
+  tags = ['jpms', 'jigsaw', 'java9', 'java10', 'modules', 'module-info']
 
   plugins {
     jpmsGradlePlugin {
-      id = artifactVersion
+      id = artifactGroup
       displayName = artifactName
     }
   }
