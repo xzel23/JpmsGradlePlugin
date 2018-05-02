@@ -3,11 +3,12 @@ buildscript {
     mavenLocal()
   }  
   dependencies {
-    classpath group: 'com.dua3.gradle.jpms', name: 'JpmsGradlePlugin', version: '0.3.1'
+    classpath group: 'com.dua3.gradle.jpms', name: 'JpmsGradlePlugin', version: '0.3.2'
   }
 }
 
 apply plugin: 'java'
+apply plugin: 'eclipse'
 apply plugin: 'com.dua3.gradle.jpms'
 
 repositories {

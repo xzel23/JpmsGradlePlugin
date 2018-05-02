@@ -31,7 +31,7 @@ dependencies {
 
 /////////////////////////////////////////////////////////////////////////////
     def artifactGroup      = 'com.dua3.gradle.jpms'
-    def artifactVersion    = '0.3.1'
+    def artifactVersion    = '0.3.2'
     def artifactName       = 'JpmsGradlePlugin'
     def mainClass          = "${artifactGroup}.${artifactName}" 
     
@@ -57,8 +57,8 @@ gradlePlugin {
     }
 }
 
-sourceCompatibility = 9
-targetCompatibility = 9
+sourceCompatibility = 8
+targetCompatibility = 8
 
 // === MAVEN publication === >
 
