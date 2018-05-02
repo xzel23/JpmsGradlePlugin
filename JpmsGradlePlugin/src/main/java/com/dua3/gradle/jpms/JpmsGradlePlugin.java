@@ -55,10 +55,6 @@ public class JpmsGradlePlugin implements Plugin<Project>{
         }
     }
 
-    public static JavaVersion getJavaVersion() {
-    	return JavaVersion.current();
-    }
-
     /**
      * Applies this plugin to the given Gradle project
      * @param project The Gradle project
@@ -67,12 +63,18 @@ public class JpmsGradlePlugin implements Plugin<Project>{
     public void apply(Project project) {
     	Gradle gradle = project.getGradle();    	
     	String gradleVersion = gradle.getGradleVersion();
-    	
         trace("gradle version: %s", gradleVersion);
         
     	if (gradleVersion.compareTo("4.6")<0) {
     		project.getLogger().warn("Unknown Gradle version: {}", gradleVersion);
     		project.getLogger().warn("Plugin needs version 4.6 or above");
+    	}
+        
+        JavaVersion javaVersion = JavaVersion.current();
+        trace("java version: %s", javaVersion);
+
+    	if (!javaVersion.isJava9Compatible()) {
+    		project.getLogger().warn("Plugin needs Java version 9 or above, current version is: {}", javaVersion);
     	}
     	
         trace("applying plugin %s", pluginname);

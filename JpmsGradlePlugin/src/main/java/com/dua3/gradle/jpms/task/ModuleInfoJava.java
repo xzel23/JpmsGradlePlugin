@@ -25,6 +25,7 @@ import java.util.spi.ToolProvider;
 
 import org.gradle.api.DefaultTask;
 import org.gradle.api.GradleException;
+import org.gradle.api.JavaVersion;
 import org.gradle.api.Project;
 import org.gradle.api.file.FileCollection;
 import org.gradle.api.tasks.TaskAction;
@@ -88,6 +89,11 @@ public class ModuleInfoJava extends DefaultTask {
 
                     JpmsGradlePlugin.trace("compiling module definitions for task");
 
+					JavaVersion javaVersion = JavaVersion.current();
+					if (!javaVersion.isJava9Compatible()) {
+						throw new GradleException("Java version 9 or above required, current version is: "+javaVersion);
+					}
+			
                     // define directories
                     String classesDir = t.getOutputs().getFiles().getSingleFile().getPath();
                     String modulepath = classesDir+File.pathSeparator+task.getClasspath().getAsPath();

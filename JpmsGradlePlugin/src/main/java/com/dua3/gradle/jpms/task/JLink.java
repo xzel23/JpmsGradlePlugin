@@ -16,6 +16,7 @@ import java.util.stream.Collectors;
 
 import org.gradle.api.DefaultTask;
 import org.gradle.api.GradleException;
+import org.gradle.api.JavaVersion;
 import org.gradle.api.Project;
 import org.gradle.api.Task;
 import org.gradle.api.file.FileCollection;
@@ -30,6 +31,11 @@ public class JLink extends DefaultTask {
 	@TaskAction
 	public void jlink() {
 		Project project = getProject();
+
+		JavaVersion javaVersion = JavaVersion.current();
+		if (!javaVersion.isJava9Compatible()) {
+			throw new GradleException("Java version 9 or above required, current version is: "+javaVersion);
+		}
 
 		ToolProvider jlink = ToolProvider.findFirst("jlink")
 				.orElseThrow(() -> new GradleException("could not get an instance of the jlink tool."));
