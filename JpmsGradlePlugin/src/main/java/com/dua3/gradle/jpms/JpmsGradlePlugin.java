@@ -28,6 +28,9 @@ import org.gradle.api.invocation.Gradle;
 import org.gradle.api.tasks.Internal;
 import org.gradle.api.tasks.compile.CompileOptions;
 import org.gradle.api.tasks.compile.JavaCompile;
+import org.gradle.plugins.ide.eclipse.GenerateEclipseClasspath;
+import org.gradle.plugins.ide.eclipse.model.Classpath;
+import org.gradle.plugins.ide.eclipse.model.Container;
 
 import com.dua3.gradle.jpms.task.JLink;
 import com.dua3.gradle.jpms.task.JLinkExtension;
@@ -80,17 +83,18 @@ public class JpmsGradlePlugin implements Plugin<Project>{
         trace("applying plugin %s", pluginname);
 
         // create and automatically add moduleInfo task
-        project.getLogger().info("Adding moduleInfo task to project");
-
-        trace("creating moduleInfo extension");
-        project.getExtensions().create("moduleInfo", ModuleInfoExtension.class);
-
-        Map<String,Object> optionsModuleInfo = new HashMap<>();
-        optionsModuleInfo.put("type", ModuleInfoJava.class);
-        ModuleInfoJava moduleInfo = (ModuleInfoJava) project.task(optionsModuleInfo, "moduleInfo");
+        ModuleInfoJava moduleInfo = addModuleInfoTask(project);
 
         // move dependencies from classpath to modulepath, and make sure moduleInfo executes first
-        project.afterEvaluate(p -> {
+        moveDependenciesToModulePath(project, moduleInfo);
+        
+        // add 'jlink' task
+        addJLinkTask(project);
+    }
+
+	private void moveDependenciesToModulePath(Project project, ModuleInfoJava moduleInfo) {
+		project.afterEvaluate(p -> {
+			// move dependencies to modulle path
 	        p.getTasks()
 	    	.withType(JavaCompile.class)
 	    	.stream()
@@ -113,10 +117,44 @@ public class JpmsGradlePlugin implements Plugin<Project>{
 		    		}
 		        });
 	        });
+	        
+	        // do the same for eclipse classpath
+	        p.getTasks().withType(GenerateEclipseClasspath.class).forEach(task -> {
+	        	task.doFirst(t -> {
+	        		task.getClasspath()
+	        		.getFile()
+	        		.getWhenMerged()
+	        		.add(arg -> {
+	    	        	JpmsGradlePlugin.trace("setting eclipse module attribute for classpath entries");
+	        			Classpath cp = (Classpath) arg;
+	        			cp.getEntries().stream()
+	        				.filter(e -> e.getKind().equals("con"))
+	        				.forEach(e -> {
+	        					Container lib = (Container) e;
+	        					JpmsGradlePlugin.trace("setting attribute for: %s", lib.getPath());
+	        					Map<String, Object> entryAttributes = lib.getEntryAttributes();
+	        					entryAttributes.put("module", true);
+	        				});
+	       			});
+	        	});
+	        });
         });
-        
-        // add 'jlink' task
-        project.getLogger().info("Adding jlink task to project");
+	}
+
+	private ModuleInfoJava addModuleInfoTask(Project project) {
+		project.getLogger().info("Adding moduleInfo task to project");
+
+        trace("creating moduleInfo extension");
+        project.getExtensions().create("moduleInfo", ModuleInfoExtension.class);
+
+        Map<String,Object> optionsModuleInfo = new HashMap<>();
+        optionsModuleInfo.put("type", ModuleInfoJava.class);
+        ModuleInfoJava moduleInfo = (ModuleInfoJava) project.task(optionsModuleInfo, "moduleInfo");
+		return moduleInfo;
+	}
+
+	private void addJLinkTask(Project project) {
+		project.getLogger().info("Adding jlink task to project");
 
         trace("creating jlink extension");
         project.getExtensions().create("jlink", JLinkExtension.class);
@@ -126,5 +164,6 @@ public class JpmsGradlePlugin implements Plugin<Project>{
         optionsJLink.put("type", JLink.class);
         JLink jlink = (JLink) project.task(optionsJLink, "jlink");
         jlink.dependsOn("build");
-    }
+	}
+
 }
