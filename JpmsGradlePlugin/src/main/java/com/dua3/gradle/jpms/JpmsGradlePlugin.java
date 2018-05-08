@@ -29,8 +29,8 @@ import org.gradle.api.tasks.Internal;
 import org.gradle.api.tasks.compile.CompileOptions;
 import org.gradle.api.tasks.compile.JavaCompile;
 import org.gradle.plugins.ide.eclipse.GenerateEclipseClasspath;
+import org.gradle.plugins.ide.eclipse.model.AbstractClasspathEntry;
 import org.gradle.plugins.ide.eclipse.model.Classpath;
-import org.gradle.plugins.ide.eclipse.model.Container;
 
 import com.dua3.gradle.jpms.task.JLink;
 import com.dua3.gradle.jpms.task.JLinkExtension;
@@ -85,8 +85,11 @@ public class JpmsGradlePlugin implements Plugin<Project>{
         // create and automatically add moduleInfo task
         ModuleInfoJava moduleInfo = addModuleInfoTask(project);
 
-        // move dependencies from classpath to modulepath, and make sure moduleInfo executes first
+        // move dependencies from classpath to modulepath
         moveDependenciesToModulePath(project, moduleInfo);
+        
+        // do the same for the eclipse classpath
+        moveEclipseDependenciesToModulePath(project);
         
         // add 'jlink' task
         addJLinkTask(project);
@@ -117,28 +120,36 @@ public class JpmsGradlePlugin implements Plugin<Project>{
 		    		}
 		        });
 	        });
-	        
-	        // do the same for eclipse classpath
-	        p.getTasks().withType(GenerateEclipseClasspath.class).forEach(task -> {
-	        	task.doFirst(t -> {
-	        		task.getClasspath()
-	        		.getFile()
-	        		.getWhenMerged()
-	        		.add(arg -> {
-	    	        	JpmsGradlePlugin.trace("setting eclipse module attribute for classpath entries");
-	        			Classpath cp = (Classpath) arg;
-	        			cp.getEntries().stream()
-	        				.filter(e -> e.getKind().equals("con"))
-	        				.forEach(e -> {
-	        					Container lib = (Container) e;
-	        					JpmsGradlePlugin.trace("setting attribute for: %s", lib.getPath());
-	        					Map<String, Object> entryAttributes = lib.getEntryAttributes();
-	        					entryAttributes.put("module", true);
-	        				});
-	       			});
-	        	});
-	        });
         });
+	}
+
+	@SuppressWarnings("unchecked")
+	private void moveEclipseDependenciesToModulePath(Project p) {
+		p.getTasks().withType(GenerateEclipseClasspath.class).forEach(task -> {
+			task.doFirst(t -> {
+				task.getClasspath()
+				.getFile()
+				.getWhenMerged()
+				.add(arg -> {
+		        	JpmsGradlePlugin.trace("setting eclipse module attribute for classpath entries");
+					Classpath cp = (Classpath) arg;
+					cp.getEntries().stream()
+						.forEach(e -> {
+							switch (e.getKind()) {
+							case "con":
+							case "lib":
+								AbstractClasspathEntry entry = (AbstractClasspathEntry) e;
+								JpmsGradlePlugin.trace("setting attribute for: %s", entry.getPath());
+								Map<String, Object> entryAttributes = entry.getEntryAttributes();
+								entryAttributes.put("module", true);
+								break;
+							default:
+								break;
+							}
+						});
+				});
+			});
+		});
 	}
 
 	private ModuleInfoJava addModuleInfoTask(Project project) {
