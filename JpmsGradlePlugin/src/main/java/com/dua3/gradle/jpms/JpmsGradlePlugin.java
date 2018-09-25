@@ -58,6 +58,19 @@ public class JpmsGradlePlugin implements Plugin<Project>{
         }
     }
 
+	private boolean isCompatible(String version) {
+		if ("4.6".compareTo(version)>=0) {
+			return true;
+		}
+
+		// version is a String (for older gradle versions it's all we have), so check for Gradle >= 4.10 manually
+		if (version.startsWith("4.1") && version.length()>=4  && Character.isDigit(version.charAt(3))) {
+			return true;
+		}
+
+		return false;
+	}
+
     /**
      * Applies this plugin to the given Gradle project
      * @param project The Gradle project
@@ -67,10 +80,10 @@ public class JpmsGradlePlugin implements Plugin<Project>{
     	Gradle gradle = project.getGradle();    	
     	String gradleVersion = gradle.getGradleVersion();
         trace("gradle version: %s", gradleVersion);
-        
-    	if (gradleVersion.compareTo("4.6")<0) {
+		
+    	if (!isCompatible(gradleVersion)) {
     		project.getLogger().warn("Unknown Gradle version: {}", gradleVersion);
-    		project.getLogger().warn("Plugin needs version 4.6 or above");
+    		project.getLogger().warn("Plugin needs Gradle version 4.6 or above");
     	}
         
         JavaVersion javaVersion = JavaVersion.current();
