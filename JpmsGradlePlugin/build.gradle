@@ -12,7 +12,7 @@ buildscript {
 
 // publishing to bintray
 plugins {
-  id "com.jfrog.bintray" version "1.8.0"
+  id "com.jfrog.bintray" version "1.8.3"
 }
 
 // plugins
