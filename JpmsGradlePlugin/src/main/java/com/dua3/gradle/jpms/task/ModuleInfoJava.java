@@ -17,6 +17,7 @@
 package com.dua3.gradle.jpms.task;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
@@ -30,8 +31,11 @@ import org.gradle.api.Project;
 import org.gradle.api.file.FileCollection;
 import org.gradle.api.tasks.TaskAction;
 import org.gradle.api.tasks.bundling.Jar;
+import org.gradle.api.tasks.compile.CompileOptions;
 import org.gradle.api.tasks.compile.JavaCompile;
 import org.gradle.api.tasks.javadoc.Javadoc;
+import org.gradle.external.javadoc.CoreJavadocOptions;
+import org.gradle.external.javadoc.MinimalJavadocOptions;
 
 import com.dua3.gradle.jpms.JpmsGradlePlugin;
 
@@ -48,7 +52,7 @@ public class ModuleInfoJava extends DefaultTask {
 				orElseThrow(() -> new GradleException("could not get ToolProvider instance for javac."));
 
 		// Flag indicating whether module defs have to be removed from javadoc input (use AtomicBoolean because primitive cannot be set in lambda)
-		AtomicBoolean needJavadocFix = new AtomicBoolean(false);
+		AtomicBoolean needRemoveModuleInfoFromJavadocInput = new AtomicBoolean(false);
 
 		// iterate over all JavaCompile tasks
         project.getTasks()
@@ -56,8 +60,9 @@ public class ModuleInfoJava extends DefaultTask {
         	.forEach(task -> {
                 JpmsGradlePlugin.trace("%s", task);
 
-                // bail out if separate compilation is not needed for this task
-                if (!isSeparateCompilationOfModuleDefNeeded(task)) {
+				// bail out if separate compilation is not needed for this task
+				boolean separateModules = isSeparateCompilationOfModuleDefNeeded(task);
+                if (!separateModules) {
                     JpmsGradlePlugin.trace("task %s has target compatibility %s, separate compilation not needed", task, task.getTargetCompatibility());
                     return;
                 }
@@ -72,7 +77,7 @@ public class ModuleInfoJava extends DefaultTask {
                 JpmsGradlePlugin.trace("other sources: %s", sources.getFiles());
 
                 // set needJavadocFix to true if needed
-                needJavadocFix.compareAndSet(false, !moduleDefs.isEmpty());
+                needRemoveModuleInfoFromJavadocInput.compareAndSet(false, !moduleDefs.isEmpty());
 
                 // before executing JavaCompile task, remove module definitions from task input
         		task.doFirst(t -> {
@@ -97,7 +102,7 @@ public class ModuleInfoJava extends DefaultTask {
                     // define directories
                     String classesDir = t.getOutputs().getFiles().getSingleFile().getPath();
                     String modulepath = classesDir+File.pathSeparator+task.getClasspath().getAsPath();
-					JpmsGradlePlugin.trace("module-path: %s", modulepath .replaceAll(File.pathSeparator, "\n"));
+					JpmsGradlePlugin.trace("module-path: %s", modulepath.replaceAll(File.pathSeparator, "\n"));
 
 					// prepare compiler arguments
                     List<String> compilerArgs = new LinkedList<>();
@@ -112,11 +117,9 @@ public class ModuleInfoJava extends DefaultTask {
         		});
         	});
 
-        // fix Javadoc inputs (because javadoc will throw an exception for module definitions in Java 8 compatibility)
-        if (needJavadocFix.get()) {
-            JpmsGradlePlugin.trace("fixing javadoc");
-        	fixJavaDoc();
-        }
+		// fix Javadoc inputs (because javadoc will throw an exception for module definitions in Java 8 compatibility)
+	    JpmsGradlePlugin.trace("fixing javadoc");
+    	fixJavadoc(needRemoveModuleInfoFromJavadocInput.get());
 
         // if target is a multi-release jar, move module definitions into the corresponding subfolder
         if (extension.isMultiRelease()) {
@@ -154,23 +157,35 @@ public class ModuleInfoJava extends DefaultTask {
 		return needSeparateModuleDef;
 	}
 
-	private void fixJavaDoc() {
+	private void fixJavadoc(boolean removeModuleInfo) {
 		Project project = getProject();
 
 		// iterate over all JavaCompile tasks
         project.getTasks()
         	.withType(Javadoc.class)
         	.forEach(task -> {
-                JpmsGradlePlugin.trace("%s", task);
+				JpmsGradlePlugin.trace("%s", task);
 
-                FileCollection inputs =
-                		task.getSource().filter(f -> !f.getName().equals("module-info.java"));
+				if (removeModuleInfo) {
+					// remove module-info.java from input
+					FileCollection inputs =
+								task.getSource().filter(f -> !f.getName().equals("module-info.java"));
 
-                // before executing JavaCompile task, remove module definitions from task input
-        		task.doFirst(t -> {
-        			JpmsGradlePlugin.trace("remove module def from javadoc input: %s", t);
-                    task.setSource(inputs.getAsFileTree());
-        		});
+						// before executing JavaCompile task, remove module definitions from task input
+						task.doFirst(t -> {
+							JpmsGradlePlugin.trace("remove module def from javadoc input: %s", t);
+							task.setSource(inputs.getAsFileTree());
+						});
+				} else {
+					// set module path
+					// TODO cleanup duplicate code
+                    String classesDir = task.getOutputs().getFiles().getSingleFile().getPath();
+                    String modulepath = classesDir+File.pathSeparator+task.getClasspath().getAsPath();
+					JpmsGradlePlugin.trace("module-path: %s", modulepath.replaceAll(File.pathSeparator, "\n"));
+
+					CoreJavadocOptions options = (CoreJavadocOptions) task.getOptions();
+					options.addStringOption("-module-path", modulepath);
+				}
         	});
 	}
 
