@@ -59,7 +59,7 @@ public class JpmsGradlePlugin implements Plugin<Project>{
     }
 
 	private boolean isCompatible(String version) {
-		if ("4.6".compareTo(version)>=0) {
+		if ("4.6".compareTo(version)<=0) {
 			return true;
 		}
 
