@@ -29,6 +29,7 @@ import org.gradle.api.GradleException;
 import org.gradle.api.JavaVersion;
 import org.gradle.api.Project;
 import org.gradle.api.file.FileCollection;
+import org.gradle.api.tasks.JavaExec;
 import org.gradle.api.tasks.TaskAction;
 import org.gradle.api.tasks.bundling.Jar;
 import org.gradle.api.tasks.compile.CompileOptions;
@@ -52,7 +53,7 @@ public class ModuleInfoJava extends DefaultTask {
 				orElseThrow(() -> new GradleException("could not get ToolProvider instance for javac."));
 
 		// Flag indicating whether module defs have to be removed from javadoc input (use AtomicBoolean because primitive cannot be set in lambda)
-		AtomicBoolean needRemoveModuleInfoFromJavadocInput = new AtomicBoolean(false);
+		AtomicBoolean hasModuleInfos = new AtomicBoolean(false);
 
 		// iterate over all JavaCompile tasks
         project.getTasks()
@@ -77,7 +78,7 @@ public class ModuleInfoJava extends DefaultTask {
                 JpmsGradlePlugin.trace("other sources: %s", sources.getFiles());
 
                 // set needJavadocFix to true if needed
-                needRemoveModuleInfoFromJavadocInput.compareAndSet(false, !moduleDefs.isEmpty());
+                hasModuleInfos.compareAndSet(false, !moduleDefs.isEmpty());
 
                 // before executing JavaCompile task, remove module definitions from task input
         		task.doFirst(t -> {
@@ -119,7 +120,11 @@ public class ModuleInfoJava extends DefaultTask {
 
 		// fix Javadoc inputs (because javadoc will throw an exception for module definitions in Java 8 compatibility)
 	    JpmsGradlePlugin.trace("fixing javadoc");
-    	fixJavadoc(needRemoveModuleInfoFromJavadocInput.get());
+    	fixJavadocTasks(hasModuleInfos.get());
+
+		// setup module path for run tasks
+	    JpmsGradlePlugin.trace("fixing run tasks");
+    	fixRunTasks(hasModuleInfos.get());
 
         // if target is a multi-release jar, move module definitions into the corresponding subfolder
         if (extension.isMultiRelease()) {
@@ -157,10 +162,10 @@ public class ModuleInfoJava extends DefaultTask {
 		return needSeparateModuleDef;
 	}
 
-	private void fixJavadoc(boolean removeModuleInfo) {
+	private void fixJavadocTasks(boolean removeModuleInfo) {
 		Project project = getProject();
 
-		// iterate over all JavaCompile tasks
+		// iterate over all Javadoc tasks
         project.getTasks()
         	.withType(Javadoc.class)
         	.forEach(task -> {
@@ -185,6 +190,46 @@ public class ModuleInfoJava extends DefaultTask {
 
 					CoreJavadocOptions options = (CoreJavadocOptions) task.getOptions();
 					options.addStringOption("-module-path", modulepath);
+				}
+        	});
+	}
+
+	/** Java command line switch for setting module path */
+	private static final String RUN_MODULE_PATH = "--module-path";
+
+	private void fixRunTasks(boolean usesModules) {
+		if (!usesModules) {
+			return;
+		}
+
+		Project project = getProject();
+
+		// iterate over all JavaExec tasks
+        project.getTasks()
+        	.withType(JavaExec.class)
+        	.forEach(task -> {
+				JpmsGradlePlugin.trace("%s", task);
+
+				// determine class path entries and prepare module path
+				String classesDir = task.getClasspath().getAsPath();
+				JpmsGradlePlugin.trace("classpath: %s", classesDir);
+
+				String modulepath = classesDir+File.pathSeparator+task.getClasspath().getAsPath();
+				JpmsGradlePlugin.trace("modulepath: %s", modulepath);
+
+				// find out if module path is already specified
+				List<String> args = task.getJvmArgs();
+				int idxFlag = args.indexOf(RUN_MODULE_PATH);
+
+				if (idxFlag<0) {
+					// module path is not specified, add it now
+					args.add(RUN_MODULE_PATH);
+					args.add(modulepath);
+					JpmsGradlePlugin.trace("task '%s': setting module-path to %s", task.getName(), modulepath.replaceAll(File.pathSeparator, "\n"));
+					task.setJvmArgs(args);
+				} else {
+					// module path is already specified, don't change it
+					JpmsGradlePlugin.trace("task '%s': module-path already set", task.getName());
 				}
         	});
 	}

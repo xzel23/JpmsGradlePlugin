@@ -3,11 +3,12 @@ buildscript {
     mavenLocal()
   }  
   dependencies {
-    classpath group: 'com.dua3.gradle.jpms', name: 'JpmsGradlePlugin', version: '0.5'
+    classpath group: 'com.dua3.gradle.jpms', name: 'JpmsGradlePlugin', version: '0.5.1'
   }
 }
 
 apply plugin: 'java'
+apply plugin: 'application'
 apply plugin: 'eclipse'
 apply plugin: 'com.dua3.gradle.jpms'
 
@@ -22,3 +23,5 @@ dependencies {
 sourceCompatibility = 8
 targetCompatibility = 8
 
+// Define the main class for the application
+mainClassName = 'com.dua3.gradle.jpms.test.Hello'
