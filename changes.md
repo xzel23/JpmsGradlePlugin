@@ -1,6 +1,10 @@
 Changes
 =======
 
+Version 0.5.1
+-------------
+ - Set module path for 'run' task if using Gradle`s 'application' plugin.
+
 Version 0.5.0
 -------------
 - The plugin now is compatible with Gradle 5.0 (tested with 5.0-rc1).

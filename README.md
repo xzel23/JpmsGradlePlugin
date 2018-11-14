@@ -5,7 +5,7 @@ This plugin adds some support for the Java Platform Module System (JPMS) to grad
 
 ```
     plugins {
-        id "com.dua3.gradle.jpms" version "0.4.1"
+        id "com.dua3.gradle.jpms" version "0.5.1"
     }
 ```
 
@@ -39,6 +39,17 @@ To create standalone applications as described in Steve Perkin's [blog](https://
         compress = 2
     }
 ```
+## Fixing Gradle´s 'javadoc' task
+
+When creating JDK-8 compatible jars, `module-info.java` is removed from javadoc input to prevent errors.
+
+## Removing `module-info.java` from eclipse project if Gradle`s 'eclipse' plugin is used
+
+Eclipse as of version 2018-09 still has problems with JDK 11 and modularized builds. As a workaround, `module-info.java` will be ignored when creating an eclipse project. You can use eclipse for development, but you should however use gradle from the command line to create artefacts for distribution.
+
+## Configuring the module path for the 'run' task
+
+If you use the 'application' gradle plugin and the project contains `module-info.java`, the option `--module-path` will be automatically set for the gradle 'run' task.
 
 ## Example project
 
