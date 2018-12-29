@@ -11,7 +11,6 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.spi.ToolProvider;
 import java.util.stream.Collectors;
 
 import org.gradle.api.DefaultTask;
@@ -34,11 +33,8 @@ public class JLink extends DefaultTask {
 
 		JavaVersion javaVersion = JavaVersion.current();
 		if (!javaVersion.isJava9Compatible()) {
-			throw new GradleException("Java version 9 or above required, current version is: "+javaVersion);
+			JpmsGradlePlugin.trace("Java version 9 or above required, current version is: "+javaVersion);
 		}
-
-		ToolProvider jlink = ToolProvider.findFirst("jlink")
-				.orElseThrow(() -> new GradleException("could not get an instance of the jlink tool."));
 
 		JLinkExtension extension = (JLinkExtension) project.getExtensions().getByName("jlink");
 
@@ -133,6 +129,6 @@ public class JLink extends DefaultTask {
         JpmsGradlePlugin.trace("jlink arguments: %s", jlinkArgs);
 
         // execute jlink
-        TaskHelper.runTool(jlink, project, jlinkArgs);
+        TaskHelper.runTool(TaskHelper.JLINK, project, jlinkArgs);
 	}
 }

@@ -22,7 +22,6 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.spi.ToolProvider;
 
 import org.gradle.api.DefaultTask;
 import org.gradle.api.GradleException;
@@ -47,10 +46,6 @@ public class ModuleInfoJava extends DefaultTask {
 		Project project = getProject();
 
         ModuleInfoExtension extension = (ModuleInfoExtension) project.getExtensions().getByName("moduleInfo");
-
-		// get the Java compiler
-		ToolProvider javac = ToolProvider.findFirst("javac").
-				orElseThrow(() -> new GradleException("could not get ToolProvider instance for javac."));
 
 		// Flag indicating whether module defs have to be removed from javadoc input (use AtomicBoolean because primitive cannot be set in lambda)
 		AtomicBoolean hasModuleInfos = new AtomicBoolean(false);
@@ -114,7 +109,7 @@ public class ModuleInfoJava extends DefaultTask {
 					JpmsGradlePlugin.trace("compiler arguments: %s", compilerArgs);
 
 					// start compilation
-					TaskHelper.runTool(javac, project, compilerArgs);
+					TaskHelper.runTool(TaskHelper.JAVAC, project, compilerArgs);
         		});
         	});
 
