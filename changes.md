@@ -1,6 +1,10 @@
 Changes
 =======
 
+Version 0.6
+-----------
+- Don't use java.util.spi.ToolProvider directly. The plugin can now be compiled under JDK 8! This also should avoid Exceptions when building Java 8 projects on Java 8 that do not include module-info.java (aka projects that don't need this plugin). It's my first take on making GitLab AutoDevOps happy. Background: I use this plugin in a project that's hosted on GitLab. Even though everything compiles just fine (I have provided a JDK 11 Dockerfile), when running tests, Gradle is executed under Java 8 and supposedly will spawn test runners to use Java 8 - whatever the reason might be.
+
 Version 0.5.1
 -------------
  - Set module path for 'run' task if using Gradle`s 'application' plugin.
