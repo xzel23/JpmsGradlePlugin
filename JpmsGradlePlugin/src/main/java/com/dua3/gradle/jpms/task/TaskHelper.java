@@ -27,8 +27,11 @@ public class TaskHelper {
         final Class<?> clsTP;
         final Optional<?> jlink;
         final Method methodRun;
+        final String tool;
 
         ToolProxy(String tool) {
+            this.tool = tool;
+
             Class<?> clsTP_ = null;
             Optional<?> jlink_ = Optional.empty(); 
             Method methodRun_ = null;
@@ -37,7 +40,7 @@ public class TaskHelper {
                 jlink_ = (Optional<?>) clsTP_.getMethod("findFirst", String.class).invoke(null, tool);
                 methodRun_ = clsTP_.getMethod("run", PrintWriter.class, PrintWriter.class, String[].class);
             } catch (ClassNotFoundException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException e) {
-                JpmsGradlePlugin.trace("Could not get jlink instance");
+                JpmsGradlePlugin.trace("Could not get "+tool+" instance");
             }
             clsTP = clsTP_;
             jlink = jlink_;
@@ -46,12 +49,12 @@ public class TaskHelper {
 
         public int run​(PrintWriter out, PrintWriter err, String... args) {
             if (!jlink.isPresent() || methodRun==null) {
-                throw  new GradleException("could not get an instance of the jlink tool.");
+                throw  new GradleException("could not get an instance of the "+tool+" tool.");
             }
             try {
                 return (int) methodRun.invoke(jlink.get(), out, err, args);
             } catch (Exception e) {
-                throw new GradleException("exception while running jlink: "+e.getMessage(), e);
+                throw new GradleException("exception while running "+tool+" (plugin needs Java >= 9): "+e.getMessage(), e);
             }
 		}
 	}

@@ -90,11 +90,6 @@ public class ModuleInfoJava extends DefaultTask {
 
                     JpmsGradlePlugin.trace("compiling module definitions for task");
 
-					JavaVersion javaVersion = JavaVersion.current();
-					if (!javaVersion.isJava9Compatible()) {
-						throw new GradleException("Java version 9 or above required, current version is: "+javaVersion);
-					}
-			
                     // define directories
                     String classesDir = t.getOutputs().getFiles().getSingleFile().getPath();
                     String modulepath = classesDir+File.pathSeparator+task.getClasspath().getAsPath();
