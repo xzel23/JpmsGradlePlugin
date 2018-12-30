@@ -5,7 +5,7 @@ This plugin adds some support for the Java Platform Module System (JPMS) to grad
 
 ```
     plugins {
-        id "com.dua3.gradle.jpms" version "0.7"
+        id "com.dua3.gradle.jpms" version "0.7.1"
     }
 ```
 
@@ -54,7 +54,7 @@ If you use the 'application' gradle plugin and the project contains `module-info
 
 ## Importing Gradle projects into Eclipse
 
-I recommend using the eclipse plugin together with this plugin and  *not* using eclipse Buildship. Buildship always messes up the module path again when it thinks it should update the project configuration. If you have a multi project configuration, make sure you use at least version 0.7 of the plugin.
+I recommend using the eclipse plugin together with this plugin and  *not* using eclipse Buildship. Buildship always messes up the module path again when it thinks it should update the project configuration. If you have a multi project configuration, make sure you use at least version 0.7.1 of the plugin.
 
 In your `gradle.build`:
 
@@ -62,7 +62,7 @@ In your `gradle.build`:
     plugins {
       id 'java'
       id 'eclipse'
-      id 'com.dua3.gradle.jpms' version '0.7'
+      id 'com.dua3.gradle.jpms' version '0.7.1'
     }
 ```
 
@@ -70,7 +70,7 @@ or for multi project builds where the new mechanism doesn't work:
 
 ```
     plugins {
-      id 'com.dua3.gradle.jpms' version '0.7' apply false
+      id 'com.dua3.gradle.jpms' version '0.7.1' apply false
     }
     
     subprojects {

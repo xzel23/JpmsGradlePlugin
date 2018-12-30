@@ -1,6 +1,10 @@
 Changes
 =======
 
+Version 0.7.1
+-------------
+- BUGFIX: plugin did not modify the module path correctly when it was loaded with the new plugin mechanism.
+
 Version 0.7
 -----------
 - I finally have multi project JPMS builds workingg with the eclipse plugin. I recommend that you do *not* use the Buildship plugin becuase it always messes up the module path again. Instead use the eclipse plugin together with this plugin and run the tasks `gradle cleanEclipse eclipse` on your project to generate an eclipse project configuration. You can repeat it later and then refresh your project in eclipse after gradle completes.
