@@ -1,6 +1,10 @@
 Changes
 =======
 
+Version 0.7
+-----------
+- I finally have multi project JPMS builds workingg with the eclipse plugin. I recommend that you do *not* use the Buildship plugin becuase it always messes up the module path again. Instead use the eclipse plugin together with this plugin and run the tasks `gradle cleanEclipse eclipse` on your project to generate an eclipse project configuration. You can repeat it later and then refresh your project in eclipse after gradle completes.
+
 Version 0.6
 -----------
 - Don't use java.util.spi.ToolProvider directly. The plugin can now be compiled under JDK 8! This also should avoid Exceptions when building Java 8 projects on Java 8 that do not include module-info.java (aka projects that don't need this plugin). It's my first take on making GitLab AutoDevOps happy. Background: I use this plugin in a project that's hosted on GitLab. Even though everything compiles just fine (I have provided a JDK 11 Dockerfile), when running tests, Gradle is executed under Java 8 and supposedly will spawn test runners to use Java 8 - whatever the reason might be.
