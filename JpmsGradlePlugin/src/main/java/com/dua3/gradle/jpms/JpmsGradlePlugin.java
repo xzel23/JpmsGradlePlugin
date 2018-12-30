@@ -111,6 +111,7 @@ public class JpmsGradlePlugin implements Plugin<Project> {
 	}
 
 	private void moveDependenciesToModulePath(Project project, ModuleInfoJava moduleInfo) {
+		trace("moveDependenciesToModulePath");
 		project.afterEvaluate(p -> {
 			// move dependencies to modulle path
 			p.getTasks().withType(JavaCompile.class).stream().forEach(task -> {
@@ -136,48 +137,52 @@ public class JpmsGradlePlugin implements Plugin<Project> {
 	}
 
 	@SuppressWarnings("unchecked")
-	private void moveEclipseDependenciesToModulePath(Project p) {
-		p.getTasks().withType(GenerateEclipseClasspath.class).forEach(task -> {
-			JpmsGradlePlugin.trace("eclipse task found");
-			task.doFirst(t -> {
-				task.getClasspath().getFile().getWhenMerged().add(arg -> {
-					JpmsGradlePlugin.trace("moving classpath entries to module path ('-->' = yes, '   ' = no) ...");
-					Classpath cp = (Classpath) arg;
-					cp.getEntries().stream().forEach(e -> {
-						if (e instanceof AbstractClasspathEntry) {
-							AbstractClasspathEntry entry = (AbstractClasspathEntry) e;
-
-							String kind = entry.getKind();
-
-							final boolean move;
-							switch (kind) {
-							case "src":
-								// if have observed that paths for project dependencies in multi-project builds
-								// start with a dash
-								move = entry.getPath().startsWith("/");
-								break;
-							case "con":
-							case "lib":
-								move = true;
-								break;
-							default:
-								move = false;
-								break;
+	private void moveEclipseDependenciesToModulePath(Project project) {
+		trace("moveEclipseDependenciesToModulePath");
+		project.afterEvaluate(p -> {
+			p.getTasks().withType(GenerateEclipseClasspath.class).forEach(task -> {
+				JpmsGradlePlugin.trace("eclipse task found");
+				task.doFirst(t -> {
+					task.getClasspath().getFile().getWhenMerged().add(arg -> {
+						JpmsGradlePlugin.trace("moving classpath entries to module path ('-->' = yes, '   ' = no) ...");
+						Classpath cp = (Classpath) arg;
+						cp.getEntries().stream().forEach(e -> {
+							if (e instanceof AbstractClasspathEntry) {
+								AbstractClasspathEntry entry = (AbstractClasspathEntry) e;
+	
+								String kind = entry.getKind();
+	
+								final boolean move;
+								switch (kind) {
+								case "src":
+									// if have observed that paths for project dependencies in multi-project builds
+									// start with a dash
+									move = entry.getPath().startsWith("/");
+									break;
+								case "con":
+								case "lib":
+									move = true;
+									break;
+								default:
+									move = false;
+									break;
+								}
+	
+								if (move) {
+									JpmsGradlePlugin.trace("--> [" + kind + "] " + entry.getPath());
+									Map<String, Object> entryAttributes = entry.getEntryAttributes();
+									entryAttributes.put("module", true);
+								} else {
+									JpmsGradlePlugin.trace("    [" + kind + "] " + entry.getPath());
+								}
 							}
-
-							if (move) {
-								JpmsGradlePlugin.trace("--> [" + kind + "] " + entry.getPath());
-								Map<String, Object> entryAttributes = entry.getEntryAttributes();
-								entryAttributes.put("module", true);
-							} else {
-								JpmsGradlePlugin.trace("    [" + kind + "] " + entry.getPath());
-							}
-						}
+						});
 					});
 				});
 			});
 		});
 	}
+		
 
 	private ModuleInfoJava addModuleInfoTask(Project project) {
 		project.getLogger().info("Adding moduleInfo task to project");
