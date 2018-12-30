@@ -17,25 +17,20 @@
 package com.dua3.gradle.jpms.task;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.gradle.api.DefaultTask;
-import org.gradle.api.GradleException;
-import org.gradle.api.JavaVersion;
 import org.gradle.api.Project;
 import org.gradle.api.file.FileCollection;
 import org.gradle.api.tasks.JavaExec;
 import org.gradle.api.tasks.TaskAction;
 import org.gradle.api.tasks.bundling.Jar;
-import org.gradle.api.tasks.compile.CompileOptions;
 import org.gradle.api.tasks.compile.JavaCompile;
 import org.gradle.api.tasks.javadoc.Javadoc;
 import org.gradle.external.javadoc.CoreJavadocOptions;
-import org.gradle.external.javadoc.MinimalJavadocOptions;
 
 import com.dua3.gradle.jpms.JpmsGradlePlugin;
 

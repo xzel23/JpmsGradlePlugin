@@ -24,7 +24,6 @@ public class TaskHelper {
     public static final ToolProxy JAVAC = new ToolProxy("javac");
      
 	private static class ToolProxy implements ToolRunner {
-        final Class<?> clsTP;
         final Optional<?> jlink;
         final Method methodRun;
         final String tool;
@@ -32,17 +31,15 @@ public class TaskHelper {
         ToolProxy(String tool) {
             this.tool = tool;
 
-            Class<?> clsTP_ = null;
             Optional<?> jlink_ = Optional.empty(); 
             Method methodRun_ = null;
             try {
-                clsTP_ = TaskHelper.class.getClassLoader().loadClass("java.util.spi.ToolProvider");
-                jlink_ = (Optional<?>) clsTP_.getMethod("findFirst", String.class).invoke(null, tool);
-                methodRun_ = clsTP_.getMethod("run", PrintWriter.class, PrintWriter.class, String[].class);
+                Class<?> clsTP = TaskHelper.class.getClassLoader().loadClass("java.util.spi.ToolProvider");
+                jlink_ = (Optional<?>) clsTP.getMethod("findFirst", String.class).invoke(null, tool);
+                methodRun_ = clsTP.getMethod("run", PrintWriter.class, PrintWriter.class, String[].class);
             } catch (ClassNotFoundException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException e) {
                 JpmsGradlePlugin.trace("Could not get "+tool+" instance");
             }
-            clsTP = clsTP_;
             jlink = jlink_;
             methodRun = methodRun_;
         }
@@ -63,7 +60,7 @@ public class TaskHelper {
         JpmsGradlePlugin.trace("runTool %s%n%s %s%n", tool, project, String.join(" ", args));
         
         ByteArrayOutputStream out = new ByteArrayOutputStream();
-        int rc = tool.run(new PrintWriter(out, true), new PrintWriter(out, true), args.toArray(new String[0]));
+        int rc = tool.run​(new PrintWriter(out, true), new PrintWriter(out, true), args.toArray(new String[0]));
 
         try {
             String compilerOutput = out.toString(StandardCharsets.UTF_8.name());

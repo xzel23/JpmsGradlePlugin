@@ -17,8 +17,8 @@ plugins {
 
 // plugins
 apply plugin: 'java-gradle-plugin'
-apply plugin: 'maven'
 apply plugin: 'maven-publish'
+apply plugin: 'eclipse'
 apply plugin: "com.gradle.plugin-publish"
 
 repositories {
