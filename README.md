@@ -5,7 +5,7 @@ This plugin adds some support for the Java Platform Module System (JPMS) to grad
 
 ```
     plugins {
-        id "com.dua3.gradle.jpms" version "0.6"
+        id "com.dua3.gradle.jpms" version "0.7"
     }
 ```
 
@@ -39,6 +39,7 @@ To create standalone applications as described in Steve Perkin's [blog](https://
         compress = 2
     }
 ```
+
 ## Fixing Gradle´s 'javadoc' task
 
 When creating JDK-8 compatible jars, `module-info.java` is removed from javadoc input to prevent errors.
@@ -50,6 +51,55 @@ Eclipse as of version 2018-09 still has problems with JDK 11 and modularized bui
 ## Configuring the module path for the 'run' task
 
 If you use the 'application' gradle plugin and the project contains `module-info.java`, the option `--module-path` will be automatically set for the gradle 'run' task.
+
+## Importing Gradle projects into Eclipse
+
+I recommend using the eclipse plugin together with this plugin and  *not* using eclipse Buildship. Buildship always messes up the module path again when it thinks it should update the project configuration. If you have a multi project configuration, make sure you use at least version 0.7 of the plugin.
+
+In your `gradle.build`:
+
+```
+    plugins {
+      id 'java'
+      id 'eclipse'
+      id 'com.dua3.gradle.jpms' version '0.7'
+    }
+```
+
+or for multi project builds where the new mechanism doesn't work:
+
+```
+    plugins {
+      id 'com.dua3.gradle.jpms' version '0.7' apply false
+    }
+    
+    subprojects {
+    
+      apply plugin:  'java'
+      apply plugin:  'eclipse'
+      apply plugin:  'com.dua3.gradle.jpms'
+      
+      ...
+    }
+```
+
+Then create/update the eclipse project configuration:
+
+```
+    gradlew cleanEclipse eclipse
+```
+
+## Issues with GitLab Auto DevOps
+
+The Auto Test on GitLab Auto DevOps failed when this plugin was loaded because Gradle was run with Java 8. I changed the plugin in the meantime so that simply loading the plugin should not make any issues as long as no module-info.java is present and compatibility is set to Java 8.
+
+This solved part of the problem in that plugin loading succeeds now. However the plain old `compileJava` task fails because only Java 8 is supported in the default configuration; the JDK 11 Dockerfile used for compilation was not used in Auto Test.
+
+If you run into this problem, just put a file called `system.properties` into the root folder of your project to tell heroku which JDK to use:
+
+```
+    java.runtime.version=11
+```
 
 ## Example project
 
