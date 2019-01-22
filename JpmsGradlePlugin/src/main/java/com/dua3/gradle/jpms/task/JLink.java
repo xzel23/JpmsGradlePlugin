@@ -68,7 +68,7 @@ public class JLink extends DefaultTask {
         String modulePath = String.join(File.pathSeparator, projectModulePath, dependendyModulePath, jmods);
 
         // output folder
-        String output = project.getBuildDir().getAbsolutePath()+File.separator+"dist";
+        String output = project.getBuildDir().getAbsolutePath()+File.separator+"appimage";
 
         // remove output folder if it exists
         if (extension.isAutoClean()) {

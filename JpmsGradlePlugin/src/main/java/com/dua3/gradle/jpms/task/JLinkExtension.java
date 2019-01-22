@@ -11,7 +11,7 @@ public class JLinkExtension {
     /** The application name to use. */
     private String application = "";
     /** The compression level. */
-    private int compress = 0;
+    private int compress = 2;
     /** Debugging flag. */
     private boolean debug = false;
     /** Automatically delete output folder before linking. */
