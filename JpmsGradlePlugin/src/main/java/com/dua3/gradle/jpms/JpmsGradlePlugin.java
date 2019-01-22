@@ -32,6 +32,8 @@ import org.gradle.plugins.ide.eclipse.GenerateEclipseClasspath;
 import org.gradle.plugins.ide.eclipse.model.AbstractClasspathEntry;
 import org.gradle.plugins.ide.eclipse.model.Classpath;
 
+import com.dua3.gradle.jpms.task.Deploy;
+import com.dua3.gradle.jpms.task.DeployExtension;
 import com.dua3.gradle.jpms.task.JLink;
 import com.dua3.gradle.jpms.task.JLinkExtension;
 import com.dua3.gradle.jpms.task.ModuleInfoExtension;
@@ -106,8 +108,9 @@ public class JpmsGradlePlugin implements Plugin<Project> {
 		// do the same for the eclipse classpath
 		moveEclipseDependenciesToModulePath(project);
 
-		// add 'jlink' task
+		// add tasks to project
 		addJLinkTask(project);
+		addDeployTask(project);
 	}
 
 	private void moveDependenciesToModulePath(Project project, ModuleInfoJava moduleInfo) {
@@ -207,6 +210,18 @@ public class JpmsGradlePlugin implements Plugin<Project> {
 		optionsJLink.put("type", JLink.class);
 		JLink jlink = (JLink) project.task(optionsJLink, "jlink");
 		jlink.dependsOn("build");
+	}
+
+	private void addDeployTask(Project project) {
+		project.getLogger().info("Adding deploy task to project");
+
+		trace("creating deploy extension");
+		project.getExtensions().create("deploy", DeployExtension.class);
+
+		trace("creating deploy task");
+		Map<String, Object> optionsDeploy = new HashMap<>();
+		Deploy deploy = (Deploy) project.task(optionsDeploy, "deploy");
+		deploy.dependsOn("jlink");
 	}
 
 }
