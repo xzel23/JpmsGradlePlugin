@@ -33,3 +33,7 @@ jlink {
 	compress = 2
   debug = false
 }
+
+deploy {
+  extraArgs = ['--mac-sign']
+}

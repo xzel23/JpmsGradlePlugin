@@ -28,15 +28,17 @@ public class Deploy extends DefaultTask {
 		TaskHelper.removeFolder(output);
         
 		// jpackager arguments
-		String jpackager = extension.getJpackager();
+		String jpackager = "jpackager";
 		String name = extension.getInstallerName();
 		String appimage = TaskHelper.getOutputFolder(project, JLink.FOLDER_NAME);
+		String[] extraArgs = extension.getExtraArgs();
 
 		List<String> args = new LinkedList<>();
 		Collections.addAll(args, "create-installer");
 		Collections.addAll(args, "--output", output);
 		Collections.addAll(args, "--name", name);
 		Collections.addAll(args, "--app-image", appimage);
+		Collections.addAll(args, extraArgs);
 
         JpmsGradlePlugin.trace("jpackager arguments: %s", args);
 

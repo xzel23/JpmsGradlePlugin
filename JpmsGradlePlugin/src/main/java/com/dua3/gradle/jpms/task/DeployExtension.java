@@ -1,12 +1,13 @@
 package com.dua3.gradle.jpms.task;
 
+import org.gradle.internal.impldep.org.bouncycastle.util.Arrays;
+
 public class DeployExtension {
 
     /** The fully qualified main class. */
     private String installerName = "installer";
 
-    /** The path to the jpackager executable. */
-    private String jpackager = "jpackager";
+    private String[] extraArgs = {};
 
     /**
      * Get installer name.
@@ -27,20 +28,20 @@ public class DeployExtension {
     }
 
     /**
-     * Get path to jpackager.
+     * Set extra arguments to pass to the packager.
      * 
-     * @return the jpackager
+     * @param extraArgs the extraArgs to set
      */
-    public String getJpackager() {
-        return jpackager;
+    public void setExtraArgs(String... extraArgs) {
+        this.extraArgs = extraArgs;
     }
 
     /**
-     * Set path to jpackager.
+     * Get extra arguments to pass to the packager.
      * 
-     * @param jpackager the jpackager to set
+     * @return the extraArgs
      */
-    public void setJpackager(String jpackager) {
-        this.jpackager = jpackager;
+    public String[] getExtraArgs() {
+        return extraArgs;
     }
 }
