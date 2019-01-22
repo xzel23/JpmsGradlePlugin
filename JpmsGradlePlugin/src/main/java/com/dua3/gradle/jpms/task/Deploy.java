@@ -28,7 +28,7 @@ public class Deploy extends DefaultTask {
 		TaskHelper.removeFolder(output);
         
 		// jpackager arguments
-		String jpackager = extension.getJPackager();
+		String jpackager = extension.getJpackager();
 		String name = extension.getInstallerName();
 		String appimage = TaskHelper.getOutputFolder(project, JLink.FOLDER_NAME);
 

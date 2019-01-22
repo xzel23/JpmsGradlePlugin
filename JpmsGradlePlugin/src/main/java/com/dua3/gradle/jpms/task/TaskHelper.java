@@ -51,9 +51,11 @@ public class TaskHelper {
                     Process p = builder.start();
                     Executors.newSingleThreadExecutor().submit(() -> copyOutput(p.getInputStream(), out));
                     Executors.newSingleThreadExecutor().submit(() -> copyOutput(p.getErrorStream(), err));
-                    return p.exitValue();
+                    return p.waitFor();
                 } catch (IOException e) {
                     throw new UncheckedIOException(e);
+                } catch (InterruptedException e) {
+                    throw new IllegalStateException("interruppted", e);
                 }
             }
 

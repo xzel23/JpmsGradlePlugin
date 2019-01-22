@@ -220,6 +220,7 @@ public class JpmsGradlePlugin implements Plugin<Project> {
 
 		trace("creating deploy task");
 		Map<String, Object> optionsDeploy = new HashMap<>();
+		optionsDeploy.put("type", Deploy.class);
 		Deploy deploy = (Deploy) project.task(optionsDeploy, "deploy");
 		deploy.dependsOn("jlink");
 	}

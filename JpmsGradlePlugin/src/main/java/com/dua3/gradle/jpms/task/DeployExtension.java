@@ -31,7 +31,7 @@ public class DeployExtension {
      * 
      * @return the jpackager
      */
-    public String getJPackager() {
+    public String getJpackager() {
         return jpackager;
     }
 
@@ -40,7 +40,7 @@ public class DeployExtension {
      * 
      * @param jpackager the jpackager to set
      */
-    public void setJPackager(String jpackager) {
+    public void setJpackager(String jpackager) {
         this.jpackager = jpackager;
     }
 }
