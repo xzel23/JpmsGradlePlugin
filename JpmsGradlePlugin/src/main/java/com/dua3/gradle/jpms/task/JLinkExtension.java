@@ -14,8 +14,6 @@ public class JLinkExtension {
     private int compress = 2;
     /** Debugging flag. */
     private boolean debug = false;
-    /** Automatically delete output folder before linking. */
-    private boolean autoClean = true;
     
     public String getAddModules() {
         return addModules;
@@ -37,10 +35,6 @@ public class JLinkExtension {
         return module;
     }
 
-    public boolean isAutoClean() {
-		return autoClean;
-	}
-
     public boolean isDebug() {
         return debug;
     }
@@ -52,10 +46,6 @@ public class JLinkExtension {
     public void setApplication(String application) {
         this.application = application;
     }
-
-    public void setAutoClean(boolean autoClean) {
-		this.autoClean = autoClean;
-	}
 
     public void setCompress(int compress) {
         this.compress = compress;
