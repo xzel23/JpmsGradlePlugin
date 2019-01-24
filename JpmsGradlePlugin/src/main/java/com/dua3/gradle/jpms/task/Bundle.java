@@ -30,6 +30,7 @@ public class Bundle extends DefaultTask {
         
 		// jpackager arguments
 		String jpackager = "jpackager";
+		String type = TaskHelper.orDefault(extension.getType(), "image");
 		String name = TaskHelper.orDefault(extension.getName(), project.getName());
 		String mainJar = project.getName()+".jar";
 		String appClass = extension.getAppClass();
@@ -37,7 +38,13 @@ public class Bundle extends DefaultTask {
 		String[] extraArgs = extension.getExtraArgs();
 
 		List<String> args = new LinkedList<>();
-		Collections.addAll(args, "create-image");
+		
+		if (type.equals("image")) {
+			Collections.addAll(args, "create-image");
+		} else {
+			Collections.addAll(args, "create-installer", type);
+		}
+
 		Collections.addAll(args, "--verbose");
 		Collections.addAll(args, "--echo-mode");
 		Collections.addAll(args, "--runtime-image", runtimeImage);
