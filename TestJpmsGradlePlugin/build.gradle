@@ -35,8 +35,7 @@ jlink {
 }
 
 bundle {
-	mainModule = 'com.dua3.gradle.jpms.test'
-	main = 'com.dua3.gradle.jpms.test.Hello'
+//	main = 'com.dua3.gradle.jpms.test.Hello'
   type = 'pkg'
   extraArgs = ['--verbose', '--echo-mode']
 }

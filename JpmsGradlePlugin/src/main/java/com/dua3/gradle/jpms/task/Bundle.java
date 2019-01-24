@@ -29,30 +29,28 @@ public class Bundle extends DefaultTask {
 		TaskHelper.removeFolder(output);
         
 		// jpackager arguments
-        String modulePath = TaskHelper.getModulePath(project);
-		String addModules = TaskHelper.getModules(extension.getMainModule(), extension.getAddModules());
 		String jpackager = "jpackager";
-		String name = TaskHelper.orDefault(extension.getApplication(), project.getName());
+		String name = TaskHelper.orDefault(extension.getName(), project.getName());
 		String mainJar = project.getName()+".jar";
-		String mainClass = extension.getMain();
+		String appClass = extension.getAppClass();
+		String runtimeImage = TaskHelper.getOutputFolder(project, JLink.FOLDER_NAME);
 		String[] extraArgs = extension.getExtraArgs();
 
 		List<String> args = new LinkedList<>();
 		Collections.addAll(args, "create-image");
 		Collections.addAll(args, "--verbose");
 		Collections.addAll(args, "--echo-mode");
+		Collections.addAll(args, "--runtime-image", runtimeImage);
 		Collections.addAll(args, "--input", input);
 		Collections.addAll(args, "--output", output);
-		Collections.addAll(args, "--module-path", modulePath);
-		Collections.addAll(args, "--add-modules", addModules);
 		Collections.addAll(args, "--name", name);
 
 		addIfPresent(args, "--main-jar", mainJar);
-		addIfPresent(args, "--class", mainClass);		
+		addIfPresent(args, "--class", appClass);		
 		
 		Collections.addAll(args, extraArgs);
 
-        JpmsGradlePlugin.trace("jpackager arguments: %s", args);
+        JpmsGradlePlugin.trace("jpackager commandline:%n%n%s %s%n%n", jpackager, String.join(" ", args));
 
 		// execute jpackager
 		ToolRunner tool = TaskHelper.toolRunner("jpackager", jpackager);

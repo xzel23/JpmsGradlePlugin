@@ -222,7 +222,7 @@ public class JpmsGradlePlugin implements Plugin<Project> {
 		Map<String, Object> optionsBundle = new HashMap<>();
 		optionsBundle.put("type", Bundle.class);
 		Bundle bundle = (Bundle) project.task(optionsBundle, "bundle");
-		bundle.dependsOn("build");
+		bundle.dependsOn("jlink");
 	}
 
 }
