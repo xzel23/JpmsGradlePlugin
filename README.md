@@ -5,7 +5,7 @@ This plugin adds some support for the Java Platform Module System (JPMS) to grad
 
 ```
     plugins {
-        id "com.dua3.gradle.jpms" version "0.7.1"
+        id "com.dua3.gradle.jpms" version "0.8.0"
     }
 ```
 
@@ -39,6 +39,23 @@ To create standalone applications as described in Steve Perkin's [blog](https://
         compress = 2
     }
 ```
+
+## Task `bundle` to create application images and installers (BETA - tested on MAC only)
+
+This task depends on the runtime image created by the `jlink` task. To create an application image use:
+
+```
+    bundle {
+      type = <one of the package types for your platform>
+      name = 'application name'
+      appClass = 'package.ApplicationClass'
+    }
+```
+
+`appClass` can either contain a `main()` method or extend the JavaFx `Application` class
+If `type` is omitted, an application image is created instead of an installer.
+
+I will add new features as I need them and find the time.
 
 ## Fixing Gradle´s 'javadoc' task
 

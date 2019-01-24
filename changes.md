@@ -1,6 +1,13 @@
 Changes
 =======
 
+Version 0.8.0
+-------------
+
+- FEATURE: create application images and installers for your modularized  JavaFX project with the new `bundle` task. Have a look at the FxBrowser project for an example.
+- BREAKING: renamed `jlink.module` to `jlink.mainModule` because of incompatibilities
+- `jlink.compression`now defaults to `2`
+
 Version 0.7.1
 -------------
 - BUGFIX: plugin did not modify the module path correctly when it was loaded with the new plugin mechanism.
