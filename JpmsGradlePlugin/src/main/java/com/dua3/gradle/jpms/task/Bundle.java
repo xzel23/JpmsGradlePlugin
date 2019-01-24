@@ -32,6 +32,7 @@ public class Bundle extends DefaultTask {
 		String jpackager = "jpackager";
 		String type = TaskHelper.orDefault(extension.getType(), "image");
 		String name = TaskHelper.orDefault(extension.getName(), project.getName());
+		String version = TaskHelper.orDefault(extension.getVersion(), "SNAPSHOT");
 		String mainJar = project.getName()+".jar";
 		String appClass = extension.getAppClass();
 		String runtimeImage = TaskHelper.getOutputFolder(project, JLink.FOLDER_NAME);
@@ -51,6 +52,7 @@ public class Bundle extends DefaultTask {
 		Collections.addAll(args, "--input", input);
 		Collections.addAll(args, "--output", output);
 		Collections.addAll(args, "--name", name);
+		Collections.addAll(args, "--version", version);
 
 		addIfPresent(args, "--main-jar", mainJar);
 		addIfPresent(args, "--class", appClass);		

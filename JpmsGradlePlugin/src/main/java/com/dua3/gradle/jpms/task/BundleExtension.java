@@ -2,13 +2,15 @@ package com.dua3.gradle.jpms.task;
 
 public class BundleExtension {
 
-    /** The tape of installer. */
+    /** The name of installer. */
     private String name = "";
+    /** The version. */
+    private String version = "";
     /** The Application class. */
     private String appClass = "";
-    /** The tape of installer. */
+    /** The type of installer. */
     private String type = "";
-    /** Etra arguments to pass on to the packager. */
+    /** Extra arguments to pass on to the packager. */
     private String[] extraArgs = {};
 
     /**
@@ -27,6 +29,24 @@ public class BundleExtension {
      */
     public void setName(String name) {
         this.name = name;
+    }
+
+    /**
+     * Get version.
+     * 
+     * @return the version
+     */
+    public String getVersion() {
+        return version;
+    }
+
+    /**
+     * Set version.
+     * 
+     * @param version the version to set
+     */
+    public void setVersion(String version) {
+        this.version = version;
     }
 
     /**
