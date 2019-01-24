@@ -1,15 +1,9 @@
 package com.dua3.gradle.jpms.task;
 
-import org.gradle.internal.impldep.org.bouncycastle.util.Arrays;
+public class BundleExtension extends JLinkExtension {
 
-public class DeployExtension {
-
-    /** The fully qualified main class. */
-    private String main = "";
     /** The tape of installer. */
     private String type = "";
-    /** The fully qualified main class. */
-    private String appName = "";
     /** Etra arguments to pass on to the packager. */
     private String[] extraArgs = {};
 
@@ -32,24 +26,6 @@ public class DeployExtension {
     }
 
     /**
-     * Get installer name.
-     * 
-     * @return the appName
-     */
-    public String getAppName() {
-        return appName;
-    }
-
-    /**
-     * Set installer name.
-     * 
-     * @param appName the appName to set
-     */
-    public void setAppName(String appName) {
-        this.appName = appName;
-    }
-
-    /**
      * Set extra arguments to pass to the packager.
      * 
      * @param extraArgs the extraArgs to set
@@ -67,14 +43,4 @@ public class DeployExtension {
         return extraArgs;
     }
 
-    public void setMain(String main) {
-        this.main = main;
-    }
-
-    /**
-     * @return the main
-     */
-    public String getMain() {
-        return main;
-    }
 }

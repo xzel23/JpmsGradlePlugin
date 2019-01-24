@@ -22,9 +22,14 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.Executors;
+import java.util.stream.Collectors;
 
 import org.gradle.api.GradleException;
 import org.gradle.api.Project;
+import org.gradle.api.Task;
+import org.gradle.api.file.FileCollection;
+import org.gradle.api.tasks.TaskOutputs;
+import org.gradle.jvm.tasks.Jar;
 
 import com.dua3.gradle.jpms.JpmsGradlePlugin;
 
@@ -157,6 +162,47 @@ public class TaskHelper {
     public static String orDefault(String s, String dflt) {
         return s!=null && !s.isEmpty() ? s : dflt;
     }
+
+
+	public static String getModulePath(Project project) {
+		// setup module path - 1. collect all generated jars
+		String projectModulePath = project.getTasks()
+		    .withType(Jar.class)
+		    .stream()
+		    .filter(t
+		    		-> !t.getClassifier().equalsIgnoreCase("javadoc")
+		    		&& !t.getClassifier().equalsIgnoreCase("src")
+		    		&& !t.getClassifier().equalsIgnoreCase("sources"))
+		    .map(Task::getOutputs)
+		    .map(TaskOutputs::getFiles)
+		    .map(FileCollection::getAsPath)
+            .collect(Collectors.joining(File.pathSeparator));
+            
+		// setup module path - 2. collect runtime dependencies
+		String dependendyModulePath = project.getConfigurations().getByName("runtime").getAsPath();
+
+		// setup module path - 3. the JDK modules
+		String jmods = System.getProperties().getProperty("java.home") + File.separator + "jmods";
+
+        // setup module path - putting it all together
+        String modulePath = Arrays.asList(projectModulePath, dependendyModulePath, jmods)
+            .stream()
+            .filter(s -> !s.isEmpty())
+            .collect(Collectors.joining(File.pathSeparator));
+		return modulePath;
+	}
+
+	public static String getModules(String rootModule, String extraModules) {
+		if (rootModule.isEmpty()) {
+			throw new GradleException("root module is not set in buid.gradle");
+		}
+
+		if (extraModules.isEmpty()) {
+			return rootModule;
+		} else {
+			return rootModule + "," + extraModules;
+		}
+	}
 
     private TaskHelper() {
         // utility class

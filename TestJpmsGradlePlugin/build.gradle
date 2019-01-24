@@ -27,14 +27,16 @@ targetCompatibility = 8
 mainClassName = 'com.dua3.gradle.jpms.test.Hello'
 
 jlink {
-	module = 'com.dua3.gradle.jpms.test'
+	mainModule = 'com.dua3.gradle.jpms.test'
 	main = 'com.dua3.gradle.jpms.test.Hello'
 	application = 'Hello'
 	compress = 2
   debug = false
 }
 
-deploy {
+bundle {
+	mainModule = 'com.dua3.gradle.jpms.test'
+	main = 'com.dua3.gradle.jpms.test.Hello'
   type = 'pkg'
   extraArgs = ['--verbose', '--echo-mode']
 }

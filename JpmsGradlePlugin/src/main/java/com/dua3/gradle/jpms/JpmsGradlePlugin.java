@@ -32,8 +32,8 @@ import org.gradle.plugins.ide.eclipse.GenerateEclipseClasspath;
 import org.gradle.plugins.ide.eclipse.model.AbstractClasspathEntry;
 import org.gradle.plugins.ide.eclipse.model.Classpath;
 
-import com.dua3.gradle.jpms.task.Deploy;
-import com.dua3.gradle.jpms.task.DeployExtension;
+import com.dua3.gradle.jpms.task.Bundle;
+import com.dua3.gradle.jpms.task.BundleExtension;
 import com.dua3.gradle.jpms.task.JLink;
 import com.dua3.gradle.jpms.task.JLinkExtension;
 import com.dua3.gradle.jpms.task.ModuleInfoExtension;
@@ -216,13 +216,13 @@ public class JpmsGradlePlugin implements Plugin<Project> {
 		project.getLogger().info("Adding deploy tasks to project");
 
 		trace("creating deploy extension");
-		project.getExtensions().create("deploy", DeployExtension.class);
+		project.getExtensions().create("bundle", BundleExtension.class);
 
 		trace("creating bndle task");
 		Map<String, Object> optionsBundle = new HashMap<>();
-		optionsBundle.put("type", Deploy.class);
-		Deploy bundle = (Deploy) project.task(optionsBundle, "bundle");
-		bundle.dependsOn("jlink");
+		optionsBundle.put("type", Bundle.class);
+		Bundle bundle = (Bundle) project.task(optionsBundle, "bundle");
+		bundle.dependsOn("build");
 	}
 
 }
