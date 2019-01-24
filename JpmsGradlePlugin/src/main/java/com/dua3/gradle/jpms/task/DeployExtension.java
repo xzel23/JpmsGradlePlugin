@@ -5,26 +5,48 @@ import org.gradle.internal.impldep.org.bouncycastle.util.Arrays;
 public class DeployExtension {
 
     /** The fully qualified main class. */
-    private String installerName = "installer";
-
+    private String main = "";
+    /** The tape of installer. */
+    private String type = "";
+    /** The fully qualified main class. */
+    private String appName = "";
+    /** Etra arguments to pass on to the packager. */
     private String[] extraArgs = {};
+
+    /**
+     * Get type of installer.
+     * 
+     * @return the installer tpye
+     */
+    public String getType() {
+        return type;
+    }
+
+    /**
+     * Set installer type.
+     * 
+     * @param type the installer to set
+     */
+    public void setType(String type) {
+        this.type = type;
+    }
 
     /**
      * Get installer name.
      * 
-     * @return the installerName
+     * @return the appName
      */
-    public String getInstallerName() {
-        return installerName;
+    public String getAppName() {
+        return appName;
     }
 
     /**
      * Set installer name.
      * 
-     * @param installerName the installerName to set
+     * @param appName the appName to set
      */
-    public void setInstallerName(String installerName) {
-        this.installerName = installerName;
+    public void setAppName(String appName) {
+        this.appName = appName;
     }
 
     /**
@@ -43,5 +65,16 @@ public class DeployExtension {
      */
     public String[] getExtraArgs() {
         return extraArgs;
+    }
+
+    public void setMain(String main) {
+        this.main = main;
+    }
+
+    /**
+     * @return the main
+     */
+    public String getMain() {
+        return main;
     }
 }

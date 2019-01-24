@@ -35,5 +35,6 @@ jlink {
 }
 
 deploy {
-  extraArgs = ['--mac-sign']
+  type = 'pkg'
+  extraArgs = ['--verbose', '--echo-mode']
 }

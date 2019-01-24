@@ -20,7 +20,7 @@ import org.gradle.api.tasks.bundling.Jar;
 
 public class JLink extends DefaultTask {
 
-	public static String FOLDER_NAME = "app-image";
+	public static String FOLDER_NAME = "jlink";
 
 	@TaskAction
 	public void jlink() {

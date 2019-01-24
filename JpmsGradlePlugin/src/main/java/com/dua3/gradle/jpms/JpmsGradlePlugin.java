@@ -110,7 +110,7 @@ public class JpmsGradlePlugin implements Plugin<Project> {
 
 		// add tasks to project
 		addJLinkTask(project);
-		addDeployTask(project);
+		addDeployTasks(project);
 	}
 
 	private void moveDependenciesToModulePath(Project project, ModuleInfoJava moduleInfo) {
@@ -212,17 +212,17 @@ public class JpmsGradlePlugin implements Plugin<Project> {
 		jlink.dependsOn("build");
 	}
 
-	private void addDeployTask(Project project) {
-		project.getLogger().info("Adding deploy task to project");
+	private void addDeployTasks(Project project) {
+		project.getLogger().info("Adding deploy tasks to project");
 
 		trace("creating deploy extension");
 		project.getExtensions().create("deploy", DeployExtension.class);
 
-		trace("creating deploy task");
-		Map<String, Object> optionsDeploy = new HashMap<>();
-		optionsDeploy.put("type", Deploy.class);
-		Deploy deploy = (Deploy) project.task(optionsDeploy, "deploy");
-		deploy.dependsOn("jlink");
+		trace("creating bndle task");
+		Map<String, Object> optionsBundle = new HashMap<>();
+		optionsBundle.put("type", Deploy.class);
+		Deploy bundle = (Deploy) project.task(optionsBundle, "bundle");
+		bundle.dependsOn("jlink");
 	}
 
 }

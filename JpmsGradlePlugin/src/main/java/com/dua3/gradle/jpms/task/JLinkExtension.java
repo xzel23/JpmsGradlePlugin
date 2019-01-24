@@ -14,7 +14,7 @@ public class JLinkExtension {
     private int compress = 2;
     /** Debugging flag. */
     private boolean debug = false;
-    
+
     public String getAddModules() {
         return addModules;
     }

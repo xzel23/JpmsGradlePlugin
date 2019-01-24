@@ -154,6 +154,10 @@ public class TaskHelper {
 		return project.getBuildDir().getAbsolutePath()+File.separator+name;
 	}
 
+    public static String orDefault(String s, String dflt) {
+        return s!=null && !s.isEmpty() ? s : dflt;
+    }
+
     private TaskHelper() {
         // utility class
     }
