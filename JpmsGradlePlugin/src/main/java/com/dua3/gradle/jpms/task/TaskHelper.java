@@ -70,7 +70,7 @@ public class TaskHelper {
 
             @Override
             public String toString() {
-                return "ToolRunner["+name+"]";
+                return name;
             }
         };
     }
@@ -109,11 +109,11 @@ public class TaskHelper {
         
         @Override
         public String toString() {
-            return "ToolRunner["+name+"]";
+            return name;
         }
 	}
 
-    static void runTool(ToolRunner tool, Project project, List<String> args) {
+    static int runTool(ToolRunner tool, Project project, List<String> args) {
         JpmsGradlePlugin.trace("runTool %s%n%s %s%n", tool, project, String.join(" ", args));
         
         ByteArrayOutputStream out = new ByteArrayOutputStream();
@@ -135,6 +135,8 @@ public class TaskHelper {
         } finally {
             JpmsGradlePlugin.trace("tool exit status: %d", rc);
         }
+
+        return rc;
     }
 
 	public static void removeFolder(String output) {
@@ -162,7 +164,6 @@ public class TaskHelper {
     public static String orDefault(String s, String dflt) {
         return s!=null && !s.isEmpty() ? s : dflt;
     }
-
 
 	public static String getModulePath(Project project) {
 		// setup module path - 1. collect all generated jars

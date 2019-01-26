@@ -63,8 +63,13 @@ public class Bundle extends DefaultTask {
 
 		// execute jpackager
 		ToolRunner tool = TaskHelper.toolRunner("jpackager", jpackager);
-        TaskHelper.runTool(tool, project, args);
+		int rc = TaskHelper.runTool(tool, project, args);
+		
+		if (rc!=0) {
+			throw new IllegalStateException("Executing "+tool+" failed with exit status "+ rc);
+		}
 	}
+
     public void addIfPresent(List<String> args, String option, String arg) {
 		if (!arg.isEmpty()) {
 			args.add(option);
