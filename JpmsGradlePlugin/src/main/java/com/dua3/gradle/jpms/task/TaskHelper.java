@@ -36,7 +36,7 @@ import com.dua3.gradle.jpms.JpmsGradlePlugin;
 public class TaskHelper {
 
     interface ToolRunner {
-		int run​(PrintWriter out, PrintWriter err, String... args);
+		int run(PrintWriter out, PrintWriter err, String... args);
 	}
 
     public static final ToolRunner JLINK = new ToolProxy("jlink");
@@ -45,7 +45,7 @@ public class TaskHelper {
     public static ToolRunner toolRunner(String name, String pathToExecutable) {
         return new TaskHelper.ToolRunner() {
             @Override
-            public int run​(PrintWriter out, PrintWriter err, String... args) {
+            public int run(PrintWriter out, PrintWriter err, String... args) {
                 ProcessBuilder builder = new ProcessBuilder();
                 List<String> command = new ArrayList<>(args.length+1);
                 command.add(pathToExecutable);
@@ -96,7 +96,7 @@ public class TaskHelper {
             methodRun = methodRun_;
         }
 
-        public int run​(PrintWriter out, PrintWriter err, String... args) {
+        public int run(PrintWriter out, PrintWriter err, String... args) {
             if (!tool.isPresent() || methodRun==null) {
                 throw  new GradleException("could not get an instance of the "+name+" tool.");
             }
@@ -117,7 +117,7 @@ public class TaskHelper {
         JpmsGradlePlugin.trace("runTool %s%n%s %s%n", tool, project, String.join(" ", args));
         
         ByteArrayOutputStream out = new ByteArrayOutputStream();
-        int rc = tool.run​(new PrintWriter(out, true), new PrintWriter(out, true), args.toArray(new String[0]));
+        int rc = tool.run(new PrintWriter(out, true), new PrintWriter(out, true), args.toArray(new String[0]));
 
         try {
             String compilerOutput = out.toString(StandardCharsets.UTF_8.name());
