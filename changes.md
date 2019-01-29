@@ -1,6 +1,11 @@
 Changes
 =======
 
+Version 0.8.1
+-------------
+
+- The location of the `jüackager` tool can be specified when calling gradle like this: `gradle bundle -DPATH_TO_JPACKAGER=/path/to/jpackager/jpackager`.
+
 Version 0.8.0
 -------------
 
