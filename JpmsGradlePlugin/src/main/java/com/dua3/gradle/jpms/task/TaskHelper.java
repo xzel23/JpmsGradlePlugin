@@ -11,9 +11,6 @@ import java.io.UncheckedIOException;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLClassLoader;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.FileVisitOption;
 import java.nio.file.Files;
@@ -27,6 +24,8 @@ import java.util.Optional;
 import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
+import com.dua3.gradle.jpms.JpmsGradlePlugin;
+
 import org.gradle.api.GradleException;
 import org.gradle.api.Project;
 import org.gradle.api.Task;
@@ -35,8 +34,6 @@ import org.gradle.api.logging.Logger;
 import org.gradle.api.logging.Logging;
 import org.gradle.api.tasks.TaskOutputs;
 import org.gradle.jvm.tasks.Jar;
-
-import com.dua3.gradle.jpms.JpmsGradlePlugin;
 
 public class TaskHelper {
 
