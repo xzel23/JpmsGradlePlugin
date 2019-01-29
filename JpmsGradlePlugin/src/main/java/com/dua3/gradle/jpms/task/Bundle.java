@@ -29,7 +29,6 @@ public class Bundle extends DefaultTask {
 		TaskHelper.removeFolder(output);
         
 		// jpackager arguments
-		String jpackager = "jpackager";
 		String type = TaskHelper.orDefault(extension.getType(), "image");
 		String name = TaskHelper.orDefault(extension.getName(), project.getName());
 		String version = TaskHelper.orDefault(extension.getVersion(), "SNAPSHOT");
@@ -59,12 +58,11 @@ public class Bundle extends DefaultTask {
 		
 		Collections.addAll(args, extraArgs);
 
-        JpmsGradlePlugin.trace("jpackager commandline:%n%n%s %s%n%n", jpackager, String.join(" ", args));
+        JpmsGradlePlugin.trace("jpackager arguments:%n%n%s %s%n%n", "jpackager", String.join(" ", args));
 
 		// execute jpackager
-		ToolRunner tool = TaskHelper.toolRunner("jpackager", jpackager);
+		ToolRunner tool = TaskHelper.JPACKAGER;
 		int rc = TaskHelper.runTool(tool, project, args);
-		
 		if (rc!=0) {
 			throw new IllegalStateException("Executing "+tool+" failed with exit status "+ rc);
 		}

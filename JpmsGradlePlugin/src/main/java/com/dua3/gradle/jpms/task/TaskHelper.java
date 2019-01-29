@@ -11,6 +11,9 @@ import java.io.UncheckedIOException;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLClassLoader;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.FileVisitOption;
 import java.nio.file.Files;
@@ -28,6 +31,8 @@ import org.gradle.api.GradleException;
 import org.gradle.api.Project;
 import org.gradle.api.Task;
 import org.gradle.api.file.FileCollection;
+import org.gradle.api.logging.Logger;
+import org.gradle.api.logging.Logging;
 import org.gradle.api.tasks.TaskOutputs;
 import org.gradle.jvm.tasks.Jar;
 
@@ -35,12 +40,78 @@ import com.dua3.gradle.jpms.JpmsGradlePlugin;
 
 public class TaskHelper {
 
-    interface ToolRunner {
-		int run(PrintWriter out, PrintWriter err, String... args);
-	}
+    /** Logger instance. */
+    private static final Logger LOGGER = Logging.getLogger(TaskHelper.class);
 
+    /** Interface for tool invocations. */
+    interface ToolRunner {
+        int run(PrintWriter out, PrintWriter err, String... args);
+    }
+
+    /** System property that points to the installation directory of jpackager. */
+    public static final String PROPERTY_PATH_TO_JPACKAGER = "PATH_TO_JPACKAGER";
+    /**
+     * Value of the system property that points to the installation directory of
+     * jpackager.
+     */
+    private static final String PATH_TO_JPACKAGER = System.getProperty(PROPERTY_PATH_TO_JPACKAGER);
+    /** The default jar file name of the jpackager jar. */
+    private static final String JPACKAGER_JAR_NAME = "jdk.packager.jar";
+    /** The class conatining jpackager's main method. */
+    private static final String JPACKAGER_CLASS = "jdk.packager.Main";
+
+    /** The jlink tool. */
     public static final ToolRunner JLINK = new ToolProxy("jlink");
+    /** The Java compiler. */
     public static final ToolRunner JAVAC = new ToolProxy("javac");
+    /** The Java packager. */
+    public static final ToolRunner JPACKAGER;
+
+    // prepare the java packager tool
+    static {
+        ToolRunner packager = null;
+
+        if (PATH_TO_JPACKAGER != null) {
+            try {
+                Path path;
+                if (PATH_TO_JPACKAGER.toLowerCase().endsWith(".jar")) {
+                    path = Paths.get(PATH_TO_JPACKAGER);
+                } else {
+                    path = Paths.get(PATH_TO_JPACKAGER, JPACKAGER_JAR_NAME);
+                }
+                URL[] packagerUrl = { path.toUri().toURL() };
+                LOGGER.debug("path to jpackager jar: "+packagerUrl[0]);
+                URLClassLoader cl = new URLClassLoader(packagerUrl);
+                Class<?> cls = cl.loadClass(JPACKAGER_CLASS);
+                Method run = cls.getMethod("run", PrintWriter.class, PrintWriter.class, String[].class);
+                packager = (out, err, args) -> {
+                    try {
+                        LOGGER.debug("invoking packager");
+                        return (int) run.invoke(null, out, err ,args);
+                    } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+                        LOGGER.warn("error invoking jpackager", e);
+                        return -1;
+                    }
+                };
+            } catch (ClassNotFoundException e) {
+                LOGGER.warn(JPACKAGER_CLASS + " not on classpath");
+            } catch (NoSuchMethodException e) {
+                LOGGER.warn(JPACKAGER_CLASS + " does not define a valid main method.", e);
+            } catch (SecurityException e) {
+                LOGGER.warn("cannot access main method of " + JPACKAGER_CLASS + ".", e);
+            } catch (MalformedURLException e) {
+                LOGGER.warn("the property " + PROPERTY_PATH_TO_JPACKAGER + " is not a valid path.", e);
+            }
+        }
+
+        if (packager != null) {
+            LOGGER.debug("using packager jar");
+            JPACKAGER = packager;
+        } else {
+            LOGGER.warn("falling back to using executable; make sure  jpackager it is on the path.");
+            JPACKAGER = TaskHelper.toolRunner("jpackager", "jpackager");
+        }
+    } 
      
     public static ToolRunner toolRunner(String name, String pathToExecutable) {
         return new TaskHelper.ToolRunner() {
