@@ -6,6 +6,8 @@ public class BundleExtension {
     private String name = "";
     /** The version. */
     private String version = "";
+    /** The jar file containing the application class. */
+    private String mainJar = "";
     /** The Application class. */
     private String appClass = "";
     /** The type of installer. */
@@ -47,6 +49,24 @@ public class BundleExtension {
      */
     public void setVersion(String version) {
         this.version = version;
+    }
+
+    /**
+     * Get the main jar.
+     * 
+     * @return the main jar
+     */
+    public String getMainJar() {
+        return mainJar;
+    }
+
+    /**
+     * Set the main jar.
+     * 
+     * @param mainJar the main jar to set
+     */
+    public void setMainJar(String mainJar) {
+        this.mainJar = mainJar;
     }
 
     /**

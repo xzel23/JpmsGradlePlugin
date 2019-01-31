@@ -24,9 +24,10 @@ public class JLink extends DefaultTask {
 			JpmsGradlePlugin.trace("Java version 9 or above required, current version is: "+javaVersion);
 		}
 
-		JLinkExtension extension = (JLinkExtension) project.getExtensions().getByName("jlink");
+		JLinkExtension jlinkExtension = (JLinkExtension) project.getExtensions().getByName("jlink");
+		BundleExtension bundleExtension = (BundleExtension) project.getExtensions().getByName("bundle");
 
-		if (extension.getApplication().isEmpty()) {
+		if (jlinkExtension.getApplication().isEmpty()) {
             project.getLogger().info("jlink.application not set, not executing jlink ({})", this);
 	        return;
 		}
@@ -39,12 +40,16 @@ public class JLink extends DefaultTask {
 		// remove output folder if it exists
 		TaskHelper.removeFolder(output);
 
+		// get settings from extension
+		String application=TaskHelper.orDefault(jlinkExtension.getApplication(), project.getName());
+		String module=jlinkExtension.getMainModule();
+		String main = TaskHelper.orDefault(jlinkExtension.getMain(), bundleExtension.getAppClass());
+
 		// prepare jlink arguments - see jlink documentation
-		String launcher = String.format("%s=%s/%s", extension.getApplication(), extension.getMainModule(),
-				extension.getMain());
+		String launcher = String.format("%s=%s/%s", application, module, main);
 
 		// list of modules to include
-		String addModules = TaskHelper.getModules(extension.getMainModule(), extension.getAddModules());
+		String addModules = TaskHelper.getModules(jlinkExtension.getMainModule(), jlinkExtension.getAddModules());
 
 		// jlink arguments
 		List<String> jlinkArgs = new LinkedList<>();
@@ -54,10 +59,10 @@ public class JLink extends DefaultTask {
 		Collections.addAll(jlinkArgs, "--output", output);
 
 		// compression
-		Collections.addAll(jlinkArgs, "--compress", String.valueOf(extension.getCompress()));
+		Collections.addAll(jlinkArgs, "--compress", String.valueOf(jlinkExtension.getCompress()));
 
 		// debugging
-		if (!extension.isDebug()) {
+		if (!jlinkExtension.isDebug()) {
 			jlinkArgs.add("-G");
 		}
 

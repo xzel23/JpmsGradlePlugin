@@ -1,6 +1,12 @@
 Changes
 =======
 
+Version 0.8.2
+-------------
+
+- Introduced new bundle type 'installer' which is an alias for the current platform's default installer bundle type. This makes it obsolete to change the installer type in build.gradle when compiling on/for another platform.
+- When creating bundles, default values for the attributes in the jlink-extension are determined based on the values given in the bundle-extension.
+
 Version 0.8.1
 -------------
 

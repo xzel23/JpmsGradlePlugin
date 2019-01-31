@@ -24,22 +24,16 @@ import java.util.Optional;
 import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
-import com.dua3.gradle.jpms.JpmsGradlePlugin;
-
 import org.gradle.api.GradleException;
 import org.gradle.api.Project;
 import org.gradle.api.Task;
 import org.gradle.api.file.FileCollection;
-import org.gradle.api.logging.Logger;
-import org.gradle.api.logging.Logging;
 import org.gradle.api.tasks.TaskOutputs;
 import org.gradle.jvm.tasks.Jar;
 
+import com.dua3.gradle.jpms.JpmsGradlePlugin;
+
 public class TaskHelper {
-
-    /** Logger instance. */
-    private static final Logger LOGGER = Logging.getLogger(TaskHelper.class);
-
     /** Interface for tool invocations. */
     interface ToolRunner {
         int run(PrintWriter out, PrintWriter err, String... args);
