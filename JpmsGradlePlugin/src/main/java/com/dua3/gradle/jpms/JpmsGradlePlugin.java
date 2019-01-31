@@ -158,7 +158,7 @@ public class JpmsGradlePlugin implements Plugin<Project> {
 								final boolean move;
 								switch (kind) {
 								case "src":
-									// if have observed that paths for project dependencies in multi-project builds
+									// I have observed that paths for project dependencies in multi-project builds
 									// start with a dash
 									move = entry.getPath().startsWith("/");
 									break;
