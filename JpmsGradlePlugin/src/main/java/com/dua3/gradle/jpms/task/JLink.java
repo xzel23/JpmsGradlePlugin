@@ -7,6 +7,7 @@ import java.util.List;
 import com.dua3.gradle.jpms.JpmsGradlePlugin;
 
 import org.gradle.api.DefaultTask;
+import org.gradle.api.GradleException;
 import org.gradle.api.JavaVersion;
 import org.gradle.api.Project;
 import org.gradle.api.tasks.TaskAction;
@@ -27,11 +28,6 @@ public class JLink extends DefaultTask {
 		JLinkExtension jlinkExtension = (JLinkExtension) project.getExtensions().getByName("jlink");
 		BundleExtension bundleExtension = (BundleExtension) project.getExtensions().getByName("bundle");
 
-		if (jlinkExtension.getApplication().isEmpty()) {
-            project.getLogger().info("jlink.application not set, not executing jlink ({})", this);
-	        return;
-		}
-		
         String modulePath = TaskHelper.getModulePath(project);
 
 		// output folder
@@ -41,15 +37,23 @@ public class JLink extends DefaultTask {
 		TaskHelper.removeFolder(output);
 
 		// get settings from extension
-		String application=TaskHelper.orDefault(jlinkExtension.getApplication(), project.getName());
-		String module=jlinkExtension.getMainModule();
-		String main = TaskHelper.orDefault(jlinkExtension.getMain(), bundleExtension.getAppClass());
+		String application=TaskHelper.getFirst(jlinkExtension.getApplication(), bundleExtension.getName(), project.getName());
+		String module=TaskHelper.getFirst(jlinkExtension.getMainModule(), bundleExtension.getMainModule());
+		String main = TaskHelper.getFirst(jlinkExtension.getMain(), bundleExtension.getMain());
+
+		if (module.isEmpty()) {
+			throw new GradleException("Main module not set. Set jlink.mainModule or bundle.mainModule.");
+		}
+
+		if (main.isEmpty()) {
+			throw new GradleException("Main not set. Set jlink.mainModule or bundle.mainModule.");
+		}
 
 		// prepare jlink arguments - see jlink documentation
 		String launcher = String.format("%s=%s/%s", application, module, main);
 
 		// list of modules to include
-		String addModules = TaskHelper.getModules(jlinkExtension.getMainModule(), jlinkExtension.getAddModules());
+		String addModules = TaskHelper.getModules(module, jlinkExtension.getAddModules());
 
 		// jlink arguments
 		List<String> jlinkArgs = new LinkedList<>();

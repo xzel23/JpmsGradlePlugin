@@ -8,8 +8,10 @@ public class BundleExtension {
     private String version = "";
     /** The jar file containing the application class. */
     private String mainJar = "";
+    /** The module containing the application class. */
+    private String mainModule = "";
     /** The Application class. */
-    private String appClass = "";
+    private String main = "";
     /** The type of installer. */
     private String type = "";
     /** Extra arguments to pass on to the packager. */
@@ -70,21 +72,39 @@ public class BundleExtension {
     }
 
     /**
+     * Get main module.
+     * 
+     * @return the mainModule
+     */
+    public String getMainModule() {
+        return mainModule;
+    }
+
+    /**
+     * Set main module.
+     * 
+     * @param mainModule the mainModule to set
+     */
+    public void setMainModule(String mainModule) {
+        this.mainModule = mainModule;
+    }
+
+    /**
      * Get Application class.
      * 
      * @return the Application class
      */
-    public String getAppClass() {
-        return appClass;
+    public String getMain() {
+        return main;
     }
 
     /**
      * Set Application class.
      * 
-     * @param appClass the Application class to set
+     * @param main the Application class to set
      */
-    public void setAppClass(String appClass) {
-        this.appClass = appClass;
+    public void setMain(String main) {
+        this.main = main;
     }
 
     /**

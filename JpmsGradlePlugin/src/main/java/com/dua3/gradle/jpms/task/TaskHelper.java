@@ -173,8 +173,13 @@ public class TaskHelper {
 		return project.getBuildDir().getAbsolutePath()+File.separator+name;
 	}
 
-    public static String orDefault(String s, String dflt) {
-        return s!=null && !s.isEmpty() ? s : dflt;
+    public static String getFirst(String... args) {
+        for (String s: args) {
+            if (s!=null && !s.isEmpty()) {
+                return s;
+            }
+        }
+        return "";
     }
 
 	public static String getModulePath(Project project) {

@@ -1,11 +1,12 @@
 # JpmsGradlePlugin
+
 This plugin adds some support for the Java Platform Module System (JPMS) to gradle builds.
 
 ## Applying the plugin
 
 ```
     plugins {
-        id "com.dua3.gradle.jpms" version "0.8.0"
+        id "com.dua3.gradle.jpms" version "0.8.2"
     }
 ```
 
@@ -46,14 +47,14 @@ This task depends on the runtime image created by the `jlink` task. To create an
 
 ```
     bundle {
-      type = <one of the package types for your platform>
+      type = <either 'image', 'installer', or one of the package types for your platform>
       name = 'application name'
-      appClass = 'package.ApplicationClass'
+      main = 'package.ApplicationClass'
     }
 ```
 
-`appClass` can either contain a `main()` method or extend the JavaFx `Application` class
-If `type` is omitted, an application image is created instead of an installer.
+`main` can either refer to a class containing a `main()` method or extending the JavaFx `Application` class.
+If `type` is omitted, an application image is created.
 
 I will add new features as I need them and find the time.
 

@@ -36,6 +36,6 @@ jlink {
 
 bundle {
   name = 'Hello'
-	appClass = 'com.dua3.gradle.jpms.test.Hello'
+	main = 'com.dua3.gradle.jpms.test.Hello'
   extraArgs = ['--verbose', '--echo-mode']
 }

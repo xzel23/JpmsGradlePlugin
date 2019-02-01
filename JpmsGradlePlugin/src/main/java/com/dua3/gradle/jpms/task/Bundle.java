@@ -21,7 +21,8 @@ public class Bundle extends DefaultTask {
 	public void bundle() {
 		Project project = getProject();
 
-		BundleExtension extension = (BundleExtension) project.getExtensions().getByName("bundle");
+		BundleExtension bundleExtension = (BundleExtension) project.getExtensions().getByName("bundle");
+		JLinkExtension jlinkExtension = (JLinkExtension) project.getExtensions().getByName("jlink");
 
         // define folders
 		String input = TaskHelper.getOutputFolder(project, "libs");
@@ -31,13 +32,13 @@ public class Bundle extends DefaultTask {
 		TaskHelper.removeFolder(output);
         
 		// jpackager arguments
-		String type = determineBundleType(TaskHelper.orDefault(extension.getType(), "image"));
-		String name = TaskHelper.orDefault(extension.getName(), project.getName());
-		String version = TaskHelper.orDefault(extension.getVersion(), "SNAPSHOT");
-		String mainJar = TaskHelper.orDefault(extension.getMainJar(), project.getName()+".jar");
-		String appClass = extension.getAppClass();
+		String type = determineBundleType(TaskHelper.getFirst(bundleExtension.getType(), "image"));
+		String name = TaskHelper.getFirst(bundleExtension.getName(), project.getName());
+		String version = TaskHelper.getFirst(bundleExtension.getVersion(), "SNAPSHOT");
+		String mainJar = TaskHelper.getFirst(bundleExtension.getMainJar(), project.getName()+".jar");
+		String main = TaskHelper.getFirst(bundleExtension.getMain(), jlinkExtension.getMain());
 		String runtimeImage = TaskHelper.getOutputFolder(project, JLink.FOLDER_NAME);
-		String[] extraArgs = extension.getExtraArgs();
+		String[] extraArgs = bundleExtension.getExtraArgs();
 
 		List<String> args = new LinkedList<>();
 		
@@ -56,7 +57,7 @@ public class Bundle extends DefaultTask {
 		Collections.addAll(args, "--version", version);
 
 		addIfPresent(args, "--main-jar", mainJar);
-		addIfPresent(args, "--class", appClass);		
+		addIfPresent(args, "--class", main);		
 		
 		Collections.addAll(args, extraArgs);
 
