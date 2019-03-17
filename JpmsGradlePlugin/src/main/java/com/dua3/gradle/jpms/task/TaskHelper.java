@@ -158,8 +158,10 @@ public class TaskHelper {
 			try {
 				Files.walk(outputFolder, FileVisitOption.FOLLOW_LINKS).sorted(Comparator.reverseOrder()).forEach(p -> {
 					try {
+                        JpmsGradlePlugin.trace("deleting: %s", p);
 						Files.deleteIfExists(p);
 					} catch (IOException e) {
+                        JpmsGradlePlugin.trace("caught exception: %s", e);
 						throw new UncheckedIOException(e);
 					}
 				});
