@@ -6,7 +6,7 @@ This plugin adds some support for the Java Platform Module System (JPMS) to grad
 
 ```
     plugins {
-        id "com.dua3.gradle.jpms" version "0.8.2"
+        id "com.dua3.gradle.jpms" version "0.8.3"
     }
 ```
 

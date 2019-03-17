@@ -1,6 +1,13 @@
 Changes
 =======
 
+Version 0.8.3
+-------------
+
+- FIX: Bundle task fails with message "could not delete output folder"
+- Added a PowerShell build script to build the plugin on windows.
+- Use `--no-daemon` flag when building the plugin to avoid running the test build with an old plugin version.
+
 Version 0.8.2
 -------------
 
