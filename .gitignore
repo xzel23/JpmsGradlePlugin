@@ -1,5 +1,5 @@
-.gradle
-**/.settings
-**/.project
-**/.DS_Store
-.vscode/
+.*
+**/.*
+**/bin/
+**/build/
+**/out/
