@@ -86,7 +86,15 @@ public class ModuleInfoJava extends DefaultTask {
                     JpmsGradlePlugin.trace("compiling module definitions for task");
 
                     // define directories
-                    String classesDir = t.getOutputs().getFiles().getSingleFile().getPath();
+                    String classesDir = t.getOutputs().getFiles().getFiles().stream()
+							.peek(f -> JpmsGradlePlugin.trace("inspecting output file: %s", f))
+							.map(File::getPath)
+							.reduce((s1,s2) -> {
+								if (!s2.equals(s1)) {
+									JpmsGradlePlugin.trace("output directory already set to %s. ignoring directory: %s", s1, s2);
+								}
+								return s1;
+							}).orElseThrow(() -> new IllegalStateException("could not determine output directory"));
                     String modulepath = classesDir+File.pathSeparator+task.getClasspath().getAsPath();
 					JpmsGradlePlugin.trace("module-path: %s", modulepath.replaceAll(File.pathSeparator, "\n"));
 
