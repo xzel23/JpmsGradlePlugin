@@ -29,7 +29,7 @@ public class Bundle extends DefaultTask {
         String output = TaskHelper.getOutputFolder(project, FOLDER_NAME_BUNDLE);
 
 		// remove output folder if it exists
-		TaskHelper.removeFolder(output);
+		TaskHelper.removeFolder(output, true);
         
 		// jpackager arguments
 		String type = determineBundleType(TaskHelper.getFirst(bundleExtension.getType(), "image"));

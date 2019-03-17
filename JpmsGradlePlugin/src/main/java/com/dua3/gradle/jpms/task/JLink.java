@@ -34,7 +34,7 @@ public class JLink extends DefaultTask {
 		String output = TaskHelper.getOutputFolder(project, FOLDER_NAME);
 
 		// remove output folder if it exists
-		TaskHelper.removeFolder(output);
+		TaskHelper.removeFolder(output, true);
 
 		// get settings from extension
 		String application=TaskHelper.getFirst(jlinkExtension.getApplication(), bundleExtension.getName(), project.getName());

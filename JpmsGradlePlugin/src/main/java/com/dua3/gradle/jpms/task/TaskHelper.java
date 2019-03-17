@@ -151,15 +151,19 @@ public class TaskHelper {
         return rc;
     }
 
-	public static void removeFolder(String output) {
+	public static void removeFolder(String output, boolean force) {
 		Path outputFolder = Paths.get(output);
 		if (Files.exists(outputFolder)) {
 			JpmsGradlePlugin.trace("removing output folder: " + outputFolder);
 			try {
-				Files.walk(outputFolder, FileVisitOption.FOLLOW_LINKS).sorted(Comparator.reverseOrder()).forEach(p -> {
+				Files.walk(outputFolder).sorted(Comparator.reverseOrder()).forEach(p -> {
 					try {
                         JpmsGradlePlugin.trace("deleting: %s", p);
-						Files.deleteIfExists(p);
+                        if (!Files.isWritable(p) && force) {
+                            JpmsGradlePlugin.trace("marking file as writable: %s", p);
+                            p.toFile().setWritable(true);
+                        }
+                        Files.deleteIfExists(p);
 					} catch (IOException e) {
                         JpmsGradlePlugin.trace("caught exception: %s", e);
 						throw new UncheckedIOException(e);
