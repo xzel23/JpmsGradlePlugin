@@ -46,7 +46,7 @@ public class JLink extends DefaultTask {
 		}
 
 		if (main.isEmpty()) {
-			throw new GradleException("Main not set. Set jlink.mainModule or bundle.mainModule.");
+			throw new GradleException("Main not set. Set jlink.main or bundle.main.");
 		}
 
 		// prepare jlink arguments - see jlink documentation
