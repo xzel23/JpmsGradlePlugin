@@ -25,9 +25,11 @@ repositories {
     jcenter()
 }
 
+def plugin_version = project.hasProperty('version') ? project.version : "SNAPSHOT"
+
 /////////////////////////////////////////////////////////////////////////////
     def artifactGroup      = 'com.dua3.gradle.jpms'
-    def artifactVersion    = '0.8.3'
+    def artifactVersion    = "${plugin_version}"
     def artifactName       = 'JpmsGradlePlugin'
     def mainClass          = "${artifactGroup}.${artifactName}" 
     

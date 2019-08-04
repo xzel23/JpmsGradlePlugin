@@ -24,6 +24,14 @@ if ( -not $? ) {
     exit
 }
 
+./gradlew --no-daemon test
+
+if ( -not $? ) { 
+    Write-Error "Error running unit test"
+    Pop-Location
+    exit
+}
+
 ./gradlew --no-daemon run
 
 if ( -not $? ) { 

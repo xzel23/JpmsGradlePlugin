@@ -3,7 +3,8 @@ buildscript {
     mavenLocal()
   }  
   dependencies {
-    classpath group: 'com.dua3.gradle.jpms', name: 'JpmsGradlePlugin', version: '0.8.3'
+    def plugin_version = project.hasProperty('version') ? project.version : "SNAPSHOT"
+    classpath group: 'com.dua3.gradle.jpms', name: 'JpmsGradlePlugin', version: "${plugin_version}"
   }
 }
 
@@ -18,6 +19,8 @@ repositories {
 }
 
 dependencies {
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.3.1'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.3.1'
 }
 
 sourceCompatibility = 8
@@ -25,6 +28,10 @@ targetCompatibility = 8
 
 // Define the main class for the application
 mainClassName = 'com.dua3.gradle.jpms.test.Hello'
+
+test {
+    useJUnitPlatform()
+}
 
 jlink {
 	mainModule = 'com.dua3.gradle.jpms.test'
