@@ -1,4 +1,4 @@
-package com.dua3.gradle.jpms.test;
+package com.dua3.gradle.jpms.tst;
 
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class HelloTest {
+public class HelloTest {
 
     private static Hello inst;
 
@@ -22,6 +22,6 @@ class HelloTest {
 
     @Test
     static void sayHello() {
-        inst.sayHello();
+        inst.sayHello(); throw new RuntimeException("BANG!");
     }
 }

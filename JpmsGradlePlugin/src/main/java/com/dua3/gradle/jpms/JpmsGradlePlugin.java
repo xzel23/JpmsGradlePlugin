@@ -16,11 +16,9 @@
  */
 package com.dua3.gradle.jpms;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
+import com.dua3.gradle.jpms.task.Bundle;
+import com.dua3.gradle.jpms.task.JLink;
+import com.dua3.gradle.jpms.task.ModuleInfoJava;
 import org.gradle.api.JavaVersion;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
@@ -32,12 +30,10 @@ import org.gradle.plugins.ide.eclipse.GenerateEclipseClasspath;
 import org.gradle.plugins.ide.eclipse.model.AbstractClasspathEntry;
 import org.gradle.plugins.ide.eclipse.model.Classpath;
 
-import com.dua3.gradle.jpms.task.Bundle;
-import com.dua3.gradle.jpms.task.BundleExtension;
-import com.dua3.gradle.jpms.task.JLink;
-import com.dua3.gradle.jpms.task.JLinkExtension;
-import com.dua3.gradle.jpms.task.ModuleInfoExtension;
-import com.dua3.gradle.jpms.task.ModuleInfoJava;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class JpmsGradlePlugin implements Plugin<Project> {
 
@@ -48,6 +44,10 @@ public class JpmsGradlePlugin implements Plugin<Project> {
 
 	@Internal
 	static boolean debug = Boolean.getBoolean(ENV_DEBUG);
+
+	public JpmsGradlePlugin() {
+		trace("plugin loaded");
+	}
 
 	public static void trace(String fmt, Object... args) {
 		trace(String.format(fmt, args));
@@ -99,6 +99,9 @@ public class JpmsGradlePlugin implements Plugin<Project> {
 
 		trace("applying plugin %s", pluginname);
 
+		// create extension
+		createJigsawExtension(project);
+
 		// create and automatically add moduleInfo task
 		ModuleInfoJava moduleInfo = addModuleInfoTask(project);
 
@@ -115,26 +118,53 @@ public class JpmsGradlePlugin implements Plugin<Project> {
 
 	private void moveDependenciesToModulePath(Project project, ModuleInfoJava moduleInfo) {
 		trace("moveDependenciesToModulePath");
+
+		JigsawExtension jigsaw = (JigsawExtension) project.getExtensions().getByName("jigsaw");
+
 		project.afterEvaluate(p -> {
 			// move dependencies to modulle path
 			p.getTasks().withType(JavaCompile.class).stream().forEach(task -> {
-				trace("%s dependsOn %s", task, moduleInfo);
-				task.dependsOn(moduleInfo);
+				boolean isTest = task.getName().contains("Test");
 
-				task.doFirst(t -> {
-					JavaVersion version = JavaVersion.toVersion(task.getTargetCompatibility());
-					trace("task %s, target compatibility: %s", task, version);
+				if (!isTest) {
+					trace("%s dependsOn %s", task, moduleInfo);
+					task.dependsOn(moduleInfo);
 
-					if (version.isJava9Compatible()) {
-						trace("moving entries from classpath to modulepath for task %s", task);
-						CompileOptions options = task.getOptions();
-						List<String> compilerArgs = new ArrayList<>(options.getAllCompilerArgs());
-						compilerArgs.add("--module-path");
-						compilerArgs.add(task.getClasspath().getAsPath());
-						options.setCompilerArgs(compilerArgs);
-						task.setClasspath(p.files());
-					}
-				});
+					task.doFirst(t -> {
+						JavaVersion version = JavaVersion.toVersion(task.getTargetCompatibility());
+						trace("task %s, target compatibility: %s", task, version);
+
+						if (version.isJava9Compatible()) {
+							trace("moving entries from classpath to modulepath for task %s", task);
+							CompileOptions options = task.getOptions();
+							List<String> compilerArgs = new ArrayList<>(options.getAllCompilerArgs());
+							compilerArgs.add("--module-path");
+							compilerArgs.add(task.getClasspath().getAsPath());
+							options.setCompilerArgs(compilerArgs);
+							task.setClasspath(p.files());
+						}
+					});
+				} else {
+					task.doFirst(t -> {
+						JavaVersion version = JavaVersion.toVersion(task.getTargetCompatibility());
+						trace("task %s, target compatibility: %s", task, version);
+
+						if (version.isJava9Compatible()) {
+							trace("patching module system for test task %s", task);
+							CompileOptions options = task.getOptions();
+							List<String> compilerArgs = new ArrayList<>(options.getAllCompilerArgs());
+							compilerArgs.add("--module-path");
+							compilerArgs.add(task.getClasspath().getAsPath());
+							compilerArgs.add("--add-modules");
+							compilerArgs.add(jigsaw.getTestLibraryModule());
+							compilerArgs.add("--add-reads");
+							compilerArgs.add(String.format("%s=%s", jigsaw.getModule(), jigsaw.getTestLibraryModule()));
+							compilerArgs.add("--patch-module");
+							compilerArgs.add(String.format("%s=%s", jigsaw.getModule(), "src"));
+							options.setCompilerArgs(compilerArgs);
+						}
+					});
+				}
 			});
 		});
 	}
@@ -185,14 +215,14 @@ public class JpmsGradlePlugin implements Plugin<Project> {
 			});
 		});
 	}
-		
+
+	private void createJigsawExtension(Project project) {
+		trace("creating jigsawInfo extension");
+		project.getExtensions().create("jigsaw", JigsawExtension.class);
+	}
 
 	private ModuleInfoJava addModuleInfoTask(Project project) {
 		project.getLogger().info("Adding moduleInfo task to project");
-
-		trace("creating moduleInfo extension");
-		project.getExtensions().create("moduleInfo", ModuleInfoExtension.class);
-
 		Map<String, Object> optionsModuleInfo = new HashMap<>();
 		optionsModuleInfo.put("type", ModuleInfoJava.class);
 		ModuleInfoJava moduleInfo = (ModuleInfoJava) project.task(optionsModuleInfo, "moduleInfo");
@@ -201,9 +231,6 @@ public class JpmsGradlePlugin implements Plugin<Project> {
 
 	private void addJLinkTask(Project project) {
 		project.getLogger().info("Adding jlink task to project");
-
-		trace("creating jlink extension");
-		project.getExtensions().create("jlink", JLinkExtension.class);
 
 		trace("creating jlink task");
 		Map<String, Object> optionsJLink = new HashMap<>();
@@ -214,9 +241,6 @@ public class JpmsGradlePlugin implements Plugin<Project> {
 
 	private void addDeployTasks(Project project) {
 		project.getLogger().info("Adding deploy tasks to project");
-
-		trace("creating deploy extension");
-		project.getExtensions().create("bundle", BundleExtension.class);
 
 		trace("creating bndle task");
 		Map<String, Object> optionsBundle = new HashMap<>();

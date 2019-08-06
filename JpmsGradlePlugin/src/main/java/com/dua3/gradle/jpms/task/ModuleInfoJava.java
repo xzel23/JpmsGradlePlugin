@@ -17,11 +17,10 @@
 package com.dua3.gradle.jpms.task;
 
 import java.io.File;
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import com.dua3.gradle.jpms.JigsawExtension;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.Project;
 import org.gradle.api.file.FileCollection;
@@ -40,7 +39,7 @@ public class ModuleInfoJava extends DefaultTask {
 	public void compileModuleInfoJava() {
 		Project project = getProject();
 
-        ModuleInfoExtension extension = (ModuleInfoExtension) project.getExtensions().getByName("moduleInfo");
+		JigsawExtension jigsaw = (JigsawExtension) project.getExtensions().getByName("jigsaw");
 
 		// Flag indicating whether module defs have to be removed from javadoc input (use AtomicBoolean because primitive cannot be set in lambda)
 		AtomicBoolean hasModuleInfos = new AtomicBoolean(false);
@@ -49,12 +48,15 @@ public class ModuleInfoJava extends DefaultTask {
         project.getTasks()
         	.withType(JavaCompile.class)
         	.forEach(task -> {
-                JpmsGradlePlugin.trace("%s", task);
+				JpmsGradlePlugin.trace("%s", task);
+
+				boolean isTest = task.getName().contains("Test");
+				JpmsGradlePlugin.trace("%s is a test task: %s", task, isTest);
 
 				// bail out if separate compilation is not needed for this task
 				boolean separateModules = isSeparateCompilationOfModuleDefNeeded(task);
-                if (!separateModules) {
-                    JpmsGradlePlugin.trace("task %s has target compatibility %s, separate compilation not needed", task, task.getTargetCompatibility());
+                if (!separateModules || isTest) {
+                    JpmsGradlePlugin.trace("task %s has target compatibility %s or is test task, separate compilation not needed", task, task.getTargetCompatibility());
                     return;
                 }
 
@@ -116,11 +118,11 @@ public class ModuleInfoJava extends DefaultTask {
     	fixJavadocTasks(hasModuleInfos.get());
 
 		// setup module path for run tasks
-	    JpmsGradlePlugin.trace("fixing run tasks");
-    	fixRunTasks(hasModuleInfos.get());
+		JpmsGradlePlugin.trace("fixing run tasks");
+		fixRunTasks(hasModuleInfos.get());
 
-        // if target is a multi-release jar, move module definitions into the corresponding subfolder
-        if (extension.isMultiRelease()) {
+		// if target is a multi-release jar, move module definitions into the corresponding subfolder
+        if (jigsaw.isMultiRelease()) {
             JpmsGradlePlugin.trace("creating multi-release jar");
             multiReleaseJar();
         }

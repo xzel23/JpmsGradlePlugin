@@ -4,6 +4,7 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
+import com.dua3.gradle.jpms.JigsawExtension;
 import com.dua3.gradle.jpms.JpmsGradlePlugin;
 
 import org.gradle.api.DefaultTask;
@@ -25,8 +26,7 @@ public class JLink extends DefaultTask {
 			JpmsGradlePlugin.trace("Java version 9 or above required, current version is: "+javaVersion);
 		}
 
-		JLinkExtension jlinkExtension = (JLinkExtension) project.getExtensions().getByName("jlink");
-		BundleExtension bundleExtension = (BundleExtension) project.getExtensions().getByName("bundle");
+		JigsawExtension jigsaw = (JigsawExtension) project.getExtensions().getByName("jigsaw");
 
         String modulePath = TaskHelper.getModulePath(project);
 
@@ -37,9 +37,9 @@ public class JLink extends DefaultTask {
 		TaskHelper.removeFolder(output, true);
 
 		// get settings from extension
-		String application=TaskHelper.getFirst(jlinkExtension.getApplication(), bundleExtension.getName(), project.getName());
-		String module=TaskHelper.getFirst(jlinkExtension.getMainModule(), bundleExtension.getMainModule());
-		String main = TaskHelper.getFirst(jlinkExtension.getMain(), bundleExtension.getMain());
+		String application=TaskHelper.getFirst(jigsaw.getApplication(), jigsaw.getApplication(), project.getName());
+		String module=TaskHelper.getFirst(jigsaw.getModule(), jigsaw.getModule());
+		String main = TaskHelper.getFirst(jigsaw.getMain(), jigsaw.getMain());
 
 		if (module.isEmpty()) {
 			throw new GradleException("Main module not set. Set jlink.mainModule or bundle.mainModule.");
@@ -53,7 +53,7 @@ public class JLink extends DefaultTask {
 		String launcher = String.format("%s=%s/%s", application, module, main);
 
 		// list of modules to include
-		String addModules = TaskHelper.getModules(module, jlinkExtension.getAddModules());
+		String addModules = TaskHelper.getModules(module, jigsaw.getAddModules());
 
 		// jlink arguments
 		List<String> jlinkArgs = new LinkedList<>();
@@ -63,10 +63,10 @@ public class JLink extends DefaultTask {
 		Collections.addAll(jlinkArgs, "--output", output);
 
 		// compression
-		Collections.addAll(jlinkArgs, "--compress", String.valueOf(jlinkExtension.getCompress()));
+		Collections.addAll(jlinkArgs, "--compress", String.valueOf(jigsaw.getCompress()));
 
 		// debugging
-		if (!jlinkExtension.isDebug()) {
+		if (!jigsaw.isDebug()) {
 			jlinkArgs.add("-G");
 		}
 

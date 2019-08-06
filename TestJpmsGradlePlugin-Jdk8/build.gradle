@@ -23,8 +23,8 @@ dependencies {
     testRuntime 'org.junit.jupiter:junit-jupiter-engine:5.5.1'
 }
 
-sourceCompatibility = 9
-targetCompatibility = 9
+sourceCompatibility = 8
+targetCompatibility = 8
 
 // Define the main class for the application
 mainClassName = 'com.dua3.gradle.jpms.tst.Hello'
@@ -44,4 +44,6 @@ jigsaw {
 
   bundleName = 'Hello'
   packagerArgs = ['--verbose', '--echo-mode']
+
+  multiRelease = true
 }

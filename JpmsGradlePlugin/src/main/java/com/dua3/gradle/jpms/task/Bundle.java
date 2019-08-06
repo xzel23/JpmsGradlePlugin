@@ -1,17 +1,17 @@
 package com.dua3.gradle.jpms.task;
 
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Locale;
-
+import com.dua3.gradle.jpms.JigsawExtension;
 import com.dua3.gradle.jpms.JpmsGradlePlugin;
 import com.dua3.gradle.jpms.task.TaskHelper.ToolRunner;
-
 import org.gradle.api.DefaultTask;
 import org.gradle.api.GradleException;
 import org.gradle.api.Project;
 import org.gradle.api.tasks.TaskAction;
+
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Locale;
 
 public class Bundle extends DefaultTask {
 
@@ -21,8 +21,7 @@ public class Bundle extends DefaultTask {
 	public void bundle() {
 		Project project = getProject();
 
-		BundleExtension bundleExtension = (BundleExtension) project.getExtensions().getByName("bundle");
-		JLinkExtension jlinkExtension = (JLinkExtension) project.getExtensions().getByName("jlink");
+		JigsawExtension jigsaw = (JigsawExtension) project.getExtensions().getByName("jigsaw");
 
         // define folders
 		String input = TaskHelper.getOutputFolder(project, "libs");
@@ -32,13 +31,13 @@ public class Bundle extends DefaultTask {
 		TaskHelper.removeFolder(output, true);
         
 		// jpackager arguments
-		String type = determineBundleType(TaskHelper.getFirst(bundleExtension.getType(), "image"));
-		String name = TaskHelper.getFirst(bundleExtension.getName(), project.getName());
-		String version = TaskHelper.getFirst(bundleExtension.getVersion(), "SNAPSHOT");
-		String mainJar = TaskHelper.getFirst(bundleExtension.getMainJar(), project.getName()+".jar");
-		String main = TaskHelper.getFirst(bundleExtension.getMain(), jlinkExtension.getMain());
+		String type = determineBundleType(TaskHelper.getFirst(jigsaw.getType(), "image"));
+		String name = TaskHelper.getFirst(jigsaw.getBundleName(), project.getName());
+		String version = TaskHelper.getFirst(jigsaw.getVersion(), "SNAPSHOT");
+		String mainJar = TaskHelper.getFirst(jigsaw.getMainJar(), project.getName()+".jar");
+		String main = TaskHelper.getFirst(jigsaw.getMain(), jigsaw.getMain());
 		String runtimeImage = TaskHelper.getOutputFolder(project, JLink.FOLDER_NAME);
-		String[] extraArgs = bundleExtension.getExtraArgs();
+		String[] extraArgs = jigsaw.getPackagerArgs();
 
 		List<String> args = new LinkedList<>();
 		
