@@ -45,7 +45,7 @@ public class JigsawExtension {
     /**
      * The type of installer.
      */
-    private String type = "";
+    private String bundleType = "";
     /**
      * Extra arguments to pass on to the packager.
      */
@@ -130,17 +130,17 @@ public class JigsawExtension {
      *
      * @return the bundle tpye
      */
-    public String getType() {
-        return type;
+    public String getBundleType() {
+        return bundleType;
     }
 
     /**
      * Set bundle type.
      *
-     * @param type the bundle type to set
+     * @param bundleType the bundle type to set
      */
-    public void setType(String type) {
-        this.type = type;
+    public void setBundleType(String bundleType) {
+        this.bundleType = bundleType;
     }
 
     /**

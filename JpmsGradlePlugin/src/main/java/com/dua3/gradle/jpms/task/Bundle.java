@@ -31,7 +31,7 @@ public class Bundle extends DefaultTask {
 		TaskHelper.removeFolder(output, true);
         
 		// jpackager arguments
-		String type = determineBundleType(TaskHelper.getFirst(jigsaw.getType(), "image"));
+		String type = determineBundleType(TaskHelper.getFirst(jigsaw.getBundleType(), "image"));
 		String name = TaskHelper.getFirst(jigsaw.getBundleName(), project.getName());
 		String version = TaskHelper.getFirst(jigsaw.getVersion(), "SNAPSHOT");
 		String mainJar = TaskHelper.getFirst(jigsaw.getMainJar(), project.getName()+".jar");
