@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 
+# get version from positional argument
 if [ $# -gt 1 ] ; then
     echo "ERROR"
     echo "to build and test the plugin: $0"
@@ -9,10 +10,19 @@ fi
 
 if [ $# -ge 1 ] ; then
     VERSION=$1
+    TAG="v${VERSION}"
+    RELEASE=1
+    # check if that version has already be released
+    if [ $(git tag -l "${TAG}") ]; then
+        echo "ERROR - version '${VERSION} has already been tagged'"
+        exit 1
+    fi
 else
     VERSION="SNAPSHOT"
+    RELEASE=0
 fi
 
+# start the build
 echo 
 echo "building as version $VERSION"
 echo 
@@ -33,3 +43,18 @@ EXTRA_ARGS="--no-daemon --stacktrace -DDEBUG_JPMS_GRADLE_PLUGIN=true"
     && ./gradlew ${VERSION_ARG} ${EXTRA_ARGS} test \
     && ./gradlew ${VERSION_ARG} ${EXTRA_ARGS} run \
     && ./gradlew ${VERSION_ARG} ${EXTRA_ARGS} eclipse) \
+|| exit
+
+if [ $RELEASE -eq 1 ] ; then
+    echo
+    read -p "Release plugin as version ${VERSION} ('YES' to continue)? " -r
+    echo  
+    if [[ $REPLY =~ ^YES|yes$ ]] ; then
+        (cd JpmsGradlePlugin && ./gradlew ${VERSION_ARG} --no-daemon publishPlugins) \
+        && git tag ${TAG} \
+        && echo "tagged and released" \
+        || exit 1
+    else
+        echo "not tagged and released"
+    fi
+fi
