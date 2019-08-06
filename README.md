@@ -2,13 +2,29 @@
 
 This plugin adds some support for the Java Platform Module System (JPMS) to gradle builds.
 
+__BREAKING CHANGE:__ the former three extension definitions `moduleInfo`, `jlink`, and `bundle` have been merged into `jigsaw` since some attributes had to be defined redundantly.
+
 ## Applying the plugin
 
 ```
     plugins {
-        id "com.dua3.gradle.jpms" version "0.8.3"
+        id "com.dua3.gradle.jpms" version "0.9.0"
     }
 ```
+
+## Fixing up test task (experimental, new in 0.9)
+
+For modular JDK 9+ builds, the module under test is patched to include the test classes (best information I have found on this is in this german language article[(https://www.informatik-aktuell.de/entwicklung/programmiersprachen/java-9-das-neue-modulsystem-jigsaw-tutorial.html)].
+
+Since the test library has to be patched in, it's requeired to pass its module name to the plugin. Example for junit5:
+
+````
+    jigsaw {
+        testLibraryModule = 'org.junit.jupiter.api'
+    }
+````
+
+For JDK 8 builds, testing is done on the classpath.
 
 ## Task `moduleInfo` to create modularised Jars that are compatible with Java 8
 
@@ -19,7 +35,7 @@ This task is added automatically when applying the plugin.
 In theory, a `module-info.java` file should be ignored when a Jar is used in a pre-Java 9 build. However some tools (**SpotBugs** < 3.1.3 being an example) will fail if a module-info is present in a library. As a workaround, you can create a multi-release jar like this:
 
 ```
-    moduleInfo {
+    jigsaw {
         multiRelease = true
     }
 ```
@@ -33,9 +49,9 @@ I have also heard but not confirmed myself that the **android** toolchain chokes
 To create standalone applications as described in Steve Perkin's [blog](https://steveperkins.com/using-java-9-modularization-to-ship-zero-dependency-native-apps/), you can use the `jlink` task like this:
 
 ```
-    jlink {
+   jigsaw {
         module = 'cli'
-        main = 'cli.Main'
+        main = 'package.MainClass'
         application = 'cli'
         compress = 2
     }
@@ -46,10 +62,10 @@ To create standalone applications as described in Steve Perkin's [blog](https://
 This task depends on the runtime image created by the `jlink` task. To create an application image use:
 
 ```
-    bundle {
+    jigsaw {
       type = <either 'image', 'installer', or one of the package types for your platform>
-      name = 'application name'
-      main = 'package.ApplicationClass'
+      application = 'application name'
+      main = 'package.MainClass'
     }
 ```
 
