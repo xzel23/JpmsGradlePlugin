@@ -16,7 +16,7 @@ __BREAKING CHANGE:__ the former three extension definitions `moduleInfo`, `jlink
 
 For modular JDK 9+ builds, the module under test is patched to include the test classes (best information I have found on this is in this german language article[(https://www.informatik-aktuell.de/entwicklung/programmiersprachen/java-9-das-neue-modulsystem-jigsaw-tutorial.html)].
 
-Since the test library has to be patched in, it's requeired to pass its module name to the plugin. Example for junit5:
+Since the test library has to be patched in, it's requeired to pass its module name to the plugin. Example for junit5 (this is also the default value):
 
 ````
     jigsaw {

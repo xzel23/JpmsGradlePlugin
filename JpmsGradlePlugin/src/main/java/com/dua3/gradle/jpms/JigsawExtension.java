@@ -50,8 +50,10 @@ public class JigsawExtension {
      * Extra arguments to pass on to the packager.
      */
     private String[] packagerArgs = {};
-
-    private String testLibraryModule = "";
+    /**
+     * The Module containing the test library.
+     */
+    private String testLibraryModule = "org.junit.jupiter.api";
 
     /**
      * Get name of bundle.
