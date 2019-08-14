@@ -1,5 +1,7 @@
 package com.dua3.gradle.jpms;
 
+import org.gradle.api.GradleException;
+
 public class JigsawExtension {
 
     /**
@@ -164,6 +166,9 @@ public class JigsawExtension {
     }
 
     public String getModule() {
+        if (module.isEmpty()) {
+            throw new GradleException("jigsaw.module not set!");
+        }
         return module;
     }
 

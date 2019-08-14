@@ -1,6 +1,16 @@
 Changes
 =======
 
+Version 1.0-BETA2
+-----------------
+
+- display error message when module is needed but was not set.
+
+Version 0.9.0
+-------------
+
+- __BREAKING__: the former three extension definitions `moduleInfo`, `jlink`, and `bundle` have been merged into `jigsaw` since some attributes had to be defined redundantly.
+
 Version 0.8.3
 -------------
 

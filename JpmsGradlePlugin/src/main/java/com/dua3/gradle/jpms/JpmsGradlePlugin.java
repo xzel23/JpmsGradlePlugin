@@ -155,12 +155,12 @@ public class JpmsGradlePlugin implements Plugin<Project> {
 							List<String> compilerArgs = new ArrayList<>(options.getAllCompilerArgs());
 							compilerArgs.add("--module-path");
 							compilerArgs.add(task.getClasspath().getAsPath());
+							compilerArgs.add("--patch-module");
+							compilerArgs.add(String.format("%s=%s", jigsaw.getModule(), "src"));
 							compilerArgs.add("--add-modules");
 							compilerArgs.add(jigsaw.getTestLibraryModule());
 							compilerArgs.add("--add-reads");
 							compilerArgs.add(String.format("%s=%s", jigsaw.getModule(), jigsaw.getTestLibraryModule()));
-							compilerArgs.add("--patch-module");
-							compilerArgs.add(String.format("%s=%s", jigsaw.getModule(), "src"));
 							options.setCompilerArgs(compilerArgs);
 						}
 					});
