@@ -5,7 +5,7 @@ import org.gradle.api.GradleException;
 public class JigsawExtension {
 
     /**
-     * Flag indicating whether a multi-release jar should be built.
+     * The module.
      */
     private String module = "";
     /**
