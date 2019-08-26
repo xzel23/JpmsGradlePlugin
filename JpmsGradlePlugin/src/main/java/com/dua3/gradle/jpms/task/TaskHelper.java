@@ -12,7 +12,6 @@ import java.io.UnsupportedEncodingException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.FileVisitOption;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -39,28 +38,27 @@ public class TaskHelper {
         int run(PrintWriter out, PrintWriter err, String... args);
     }
 
-    /** System property that points to the installation directory of jpackager. */
-    public static final String PROPERTY_PATH_TO_JPACKAGER = "PATH_TO_JPACKAGER";
-    /**
-     * Value of the system property that points to the installation directory of
-     * jpackager.
-     */
-    private static final String PATH_TO_JPACKAGER = System.getProperty(PROPERTY_PATH_TO_JPACKAGER, "jpackager");
+    /** System property that points to the jpackager binary. */
+    public static final String PROPERTY_PATH_TO_JPACKAGER = "JPACKAGER";
+    /** Default path for jpackager binary. */
+    public static final String DEFAULT_JPACKAGER = "jpackager";
 
     /** The jlink tool. */
     public static final ToolRunner JLINK = new ToolProxy("jlink");
     /** The Java compiler. */
     public static final ToolRunner JAVAC = new ToolProxy("javac");
     /** The Java packager. */
-    public static final ToolRunner JPACKAGER = TaskHelper.toolRunner("jpackager", PATH_TO_JPACKAGER);
+    public static final ToolRunner JPACKAGER = TaskHelper.toolRunner("jpackager", PROPERTY_PATH_TO_JPACKAGER, DEFAULT_JPACKAGER);
      
-    public static ToolRunner toolRunner(String name, String pathToExecutable) {
+    public static ToolRunner toolRunner(String name, String toolExecutablePathProperty, String toolExecutablePathDefault) {
+        final String tool = System.getProperty(toolExecutablePathProperty, toolExecutablePathDefault);
+
         return new TaskHelper.ToolRunner() {
             @Override
             public int run(PrintWriter out, PrintWriter err, String... args) {
                 ProcessBuilder builder = new ProcessBuilder();
                 List<String> command = new ArrayList<>(args.length+1);
-                command.add(pathToExecutable);
+                command.add(tool);
                 command.addAll(Arrays.asList(args));
                 builder.command(command);
                 
@@ -70,7 +68,10 @@ public class TaskHelper {
                     Executors.newSingleThreadExecutor().submit(() -> copyOutput(p.getErrorStream(), err));
                     return p.waitFor();
                 } catch (IOException e) {
-                    throw new UncheckedIOException(e);
+                    String message = String.format(
+                        "Error running '%s'. Either make sure that '%s' is on your system's path, or set an environment variable %s to point to the tool executable.", 
+                        name, toolExecutablePathDefault, toolExecutablePathProperty);
+                    throw new UncheckedIOException(message, e);
                 } catch (InterruptedException e) {
                     throw new IllegalStateException("interruppted", e);
                 }
