@@ -1,6 +1,11 @@
 Changes
 =======
 
+Version 1.0-BETA4
+-----------------
+
+- JPACKAGER can be either set via environment variable or property with the latter taking precedence
+
 Version 1.0-BETA3
 -----------------
 
