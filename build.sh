@@ -4,22 +4,31 @@
 if [ $# -gt 1 ] ; then
     echo "ERROR"
     echo "to build and test the plugin: $0"
-    echo "to release a new version of the plugin: $0 -Pversion=<version>"
+    echo "to release a new version of the plugin: $0 <version>"
     exit 1
 fi
 
-if [ $# -ge 1 ] ; then
+if [ $# -eq 1 ] ; then
     VERSION=$1
     TAG="v${VERSION}"
     RELEASE=1
+
+    # check that version matches regex
+    REGEX=^[0-9]+\(\\.\[0-9\]+\)*\[a-z\]?\(-\[A-Za-z0-9\]+\)?\$
+    if ! [[ "$VERSION" =~ ${REGEX} ]]; then
+        echo "ERROR - version '${VERSION}' does not match regex ${REGEX}"
+        exit 1
+    fi
+
     # check if that version has already be released
     if [ $(git tag -l "${TAG}") ]; then
-        echo "ERROR - version '${VERSION} has already been tagged'"
+        echo "ERROR - version '${VERSION}' has already been tagged with tag '${TAG}'"
         exit 1
     fi
 else
     VERSION="SNAPSHOT"
     RELEASE=0
+    echo "building a snapshot version. To release a new version of the plugin, use: $0 <version>"
 fi
 
 # start the build

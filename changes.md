@@ -1,6 +1,12 @@
 Changes
 =======
 
+Version 1.0-BETA3
+-----------------
+
+- improved error message if jpackageer tool could not be found when trying to create a bundle.
+- some small cleanups in the build script.
+
 Version 1.0-BETA2
 -----------------
 

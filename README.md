@@ -72,6 +72,8 @@ This task depends on the runtime image created by the `jlink` task. To create an
 `main` can either refer to a class containing a `main()` method or extending the JavaFx `Application` class.
 If `type` is omitted, an application image is created.
 
+**Note that in order to create an installer, the [jpackager](https://mail.openjdk.java.net/pipermail/openjfx-dev/2018-September/022500.html) tool has to be installed on your system.**
+
 I will add new features as I need them and find the time.
 
 ## Fixing Gradle´s 'javadoc' task
