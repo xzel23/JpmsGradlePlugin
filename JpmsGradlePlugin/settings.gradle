@@ -16,5 +16,3 @@ include 'services:webservice'
 */
 
 rootProject.name = 'JpmsGradlePlugin'
-
-ext.plugin_version = '0.9.0'
