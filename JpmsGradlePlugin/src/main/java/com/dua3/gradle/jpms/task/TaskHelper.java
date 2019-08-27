@@ -72,7 +72,7 @@ public class TaskHelper {
                 } catch (IOException e) {
                     String message = String.format(
                         "Error running '%s': %s%n%nEither make sure that '%s' is on your system's path, or set an environment variable %s to point to the tool executable.", 
-                        e.getMessage(), toolExecutablePathDefault, toolExecutablePathProperty);
+                        name, e.getMessage(), toolExecutablePathDefault, toolExecutablePathProperty);
                     throw new UncheckedIOException(message, e);
                 } catch (InterruptedException e) {
                     throw new IllegalStateException("interruppted", e);
