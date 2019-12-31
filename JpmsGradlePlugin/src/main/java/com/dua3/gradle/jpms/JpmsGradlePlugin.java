@@ -102,6 +102,12 @@ public class JpmsGradlePlugin implements Plugin<Project> {
 		// create extension
 		createJigsawExtension(project);
 
+		// enable debugging
+		JigsawExtension jigsaw = (JigsawExtension) project.getExtensions().getByName("jigsaw");
+		if (jigsaw!=null) {
+			debug = jigsaw.isDebug();
+		}
+
 		// create and automatically add moduleInfo task
 		ModuleInfoJava moduleInfo = addModuleInfoTask(project);
 
