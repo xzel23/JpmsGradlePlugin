@@ -59,7 +59,7 @@ if [ $RELEASE -eq 1 ] ; then
     read -p "Release plugin as version ${VERSION} ('YES' to continue)? " -r
     echo  
     if [[ $REPLY =~ ^YES|yes$ ]] ; then
-        (cd JpmsGradlePlugin && ./gradlew ${VERSION_ARG} --no-daemon publishPlugins) \
+        (cd JpmsGradlePlugin && ../gradlew ${VERSION_ARG} --no-daemon publishPlugins) \
         && git tag ${TAG} \
         && echo "tagged and released" \
         || exit 1
