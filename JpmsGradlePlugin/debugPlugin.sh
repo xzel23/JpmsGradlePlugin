@@ -8,7 +8,7 @@ DIR=`dirname $0`
 
 (
     cd ${DIR}
-    ./gradlew build publishToMavenLocal \
-    && ( cd ../TestJpmsGradlePlugin && ./gradlew -PDEBUG_JPMS_GRADLE_PLUGIN=true -Dorg.gradle.debug=true --no-daemon test & ) \
+    ../gradlew build publishToMavenLocal \
+    && ( cd ../TestJpmsGradlePlugin && ../gradlew -PDEBUG_JPMS_GRADLE_PLUGIN=true -Dorg.gradle.debug=true --no-daemon test & ) \
     && sleep 5
 )

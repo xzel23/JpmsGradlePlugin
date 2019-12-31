@@ -39,19 +39,19 @@ echo
 VERSION_ARG="-Pversion=${VERSION}"
 EXTRA_ARGS="--no-daemon --stacktrace -DDEBUG_JPMS_GRADLE_PLUGIN=true"
 
-(cd JpmsGradlePlugin && ./gradlew ${VERSION_ARG} --no-daemon clean build publishToMavenLocal) \
+(cd JpmsGradlePlugin && ../gradlew ${VERSION_ARG} --no-daemon clean build publishToMavenLocal) \
 && echo "========== JDK9 ==========" \
 && (cd TestJpmsGradlePlugin \
-    && ./gradlew ${VERSION_ARG} ${EXTRA_ARGS} clean build \
-    && ./gradlew ${VERSION_ARG} ${EXTRA_ARGS} test \
-    && ./gradlew ${VERSION_ARG} ${EXTRA_ARGS} run \
-    && ./gradlew ${VERSION_ARG} ${EXTRA_ARGS} eclipse) \
+    && ../gradlew ${VERSION_ARG} ${EXTRA_ARGS} clean build \
+    && ../gradlew ${VERSION_ARG} ${EXTRA_ARGS} test \
+    && ../gradlew ${VERSION_ARG} ${EXTRA_ARGS} run \
+    && ../gradlew ${VERSION_ARG} ${EXTRA_ARGS} eclipse) \
 && echo "========== JDK8 ==========" \
 && (cd TestJpmsGradlePlugin-Jdk8 \
-    && ./gradlew ${VERSION_ARG} ${EXTRA_ARGS} clean build \
-    && ./gradlew ${VERSION_ARG} ${EXTRA_ARGS} test \
-    && ./gradlew ${VERSION_ARG} ${EXTRA_ARGS} run \
-    && ./gradlew ${VERSION_ARG} ${EXTRA_ARGS} eclipse) \
+    && ../gradlew ${VERSION_ARG} ${EXTRA_ARGS} clean build \
+    && ../gradlew ${VERSION_ARG} ${EXTRA_ARGS} test \
+    && ../gradlew ${VERSION_ARG} ${EXTRA_ARGS} run \
+    && ../gradlew ${VERSION_ARG} ${EXTRA_ARGS} eclipse) \
 || exit
 
 if [ $RELEASE -eq 1 ] ; then
