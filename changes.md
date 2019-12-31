@@ -1,6 +1,18 @@
 Changes
 =======
 
+Version 1.0-BETA6
+-----------------
+
+- update gradle to 6.0.1 (plugin now compilable on JDK 13)
+- use single instance of gradle wrapper
+- enable debug output when jigsaw.debug is set
+
+Version 1.0-BETA5
+-----------------
+
+- fix format exception when jpackager not found
+
 Version 1.0-BETA4
 -----------------
 
