@@ -48,57 +48,57 @@ public class ModuleInfoJava extends DefaultTask {
         project.getTasks()
         	.withType(JavaCompile.class)
         	.forEach(task -> {
-				JpmsGradlePlugin.trace("%s", task);
+				JpmsGradlePlugin.trace(jigsaw.isDebug(), "%s", task);
 
 				boolean isTest = task.getName().contains("Test");
-				JpmsGradlePlugin.trace("%s is a test task: %s", task, isTest);
+				JpmsGradlePlugin.trace(jigsaw.isDebug(), "%s is a test task: %s", task, isTest);
 
 				// bail out if separate compilation is not needed for this task
 				boolean separateModules = isSeparateCompilationOfModuleDefNeeded(task);
                 if (!separateModules || isTest) {
-                    JpmsGradlePlugin.trace("task %s has target compatibility %s or is test task, separate compilation not needed", task, task.getTargetCompatibility());
+                    JpmsGradlePlugin.trace(jigsaw.isDebug(), "task %s has target compatibility %s or is test task, separate compilation not needed", task, task.getTargetCompatibility());
                     return;
                 }
 
                 // separate module definitions from other sources
                 FileCollection moduleDefs =
                 		task.getSource().filter(f -> f.getName().equals("module-info.java"));
-                JpmsGradlePlugin.trace("module definitions: %s", moduleDefs.getFiles());
+                JpmsGradlePlugin.trace(jigsaw.isDebug(), "module definitions: %s", moduleDefs.getFiles());
 
                 FileCollection sources =
                 		task.getSource().filter(f -> !f.getName().equals("module-info.java"));
-                JpmsGradlePlugin.trace("other sources: %s", sources.getFiles());
+                JpmsGradlePlugin.trace(jigsaw.isDebug(), "other sources: %s", sources.getFiles());
 
                 // set needJavadocFix to true if needed
                 hasModuleInfos.compareAndSet(false, !moduleDefs.isEmpty());
 
                 // before executing JavaCompile task, remove module definitions from task input
         		task.doFirst(t -> {
-                    JpmsGradlePlugin.trace("removing module definitions from task input");
+                    JpmsGradlePlugin.trace(jigsaw.isDebug(), "removing module definitions from task input");
                     task.setSource(sources.getAsFileTree());
         		});
 
                 // at last, compile the module definition with Java 9 compatibility
         		task.doLast(t -> {
         			if (moduleDefs.isEmpty()) {
-                        JpmsGradlePlugin.trace("task has no module def");
+                        JpmsGradlePlugin.trace(jigsaw.isDebug(), "task has no module def");
         				return;
         			}
 
-                    JpmsGradlePlugin.trace("compiling module definitions for task");
+                    JpmsGradlePlugin.trace(jigsaw.isDebug(), "compiling module definitions for task");
 
                     // define directories
                     String classesDir = t.getOutputs().getFiles().getFiles().stream()
-							.peek(f -> JpmsGradlePlugin.trace("inspecting output file: %s", f))
+							.peek(f -> JpmsGradlePlugin.trace(jigsaw.isDebug(), "inspecting output file: %s", f))
 							.map(File::getPath)
 							.reduce((s1,s2) -> {
 								if (!s2.equals(s1)) {
-									JpmsGradlePlugin.trace("output directory already set to %s. ignoring directory: %s", s1, s2);
+									JpmsGradlePlugin.trace(jigsaw.isDebug(), "output directory already set to %s. ignoring directory: %s", s1, s2);
 								}
 								return s1;
 							}).orElseThrow(() -> new IllegalStateException("could not determine output directory"));
                     String modulepath = classesDir+File.pathSeparator+task.getClasspath().getAsPath();
-					JpmsGradlePlugin.trace("module-path: %s", modulepath.replaceAll(File.pathSeparator, "\n"));
+					JpmsGradlePlugin.trace(jigsaw.isDebug(), "module-path: %s", modulepath.replaceAll(File.pathSeparator, "\n"));
 
 					// prepare compiler arguments
                     List<String> compilerArgs = new LinkedList<>();
@@ -106,7 +106,7 @@ public class ModuleInfoJava extends DefaultTask {
                     Collections.addAll(compilerArgs, "--module-path", modulepath);
                     Collections.addAll(compilerArgs, "-d", classesDir.toString());
                     moduleDefs.getFiles().stream().map(File::toString).forEach(compilerArgs::add);
-					JpmsGradlePlugin.trace("compiler arguments: %s", compilerArgs);
+					JpmsGradlePlugin.trace(jigsaw.isDebug(), "compiler arguments: %s", compilerArgs);
 
 					// start compilation
 					TaskHelper.runTool(TaskHelper.JAVAC, project, compilerArgs);
@@ -114,16 +114,16 @@ public class ModuleInfoJava extends DefaultTask {
         	});
 
 		// fix Javadoc inputs (because javadoc will throw an exception for module definitions in Java 8 compatibility)
-	    JpmsGradlePlugin.trace("fixing javadoc");
+	    JpmsGradlePlugin.trace(jigsaw.isDebug(), "fixing javadoc");
     	fixJavadocTasks(hasModuleInfos.get());
 
 		// setup module path for run tasks
-		JpmsGradlePlugin.trace("fixing run tasks");
+		JpmsGradlePlugin.trace(jigsaw.isDebug(), "fixing run tasks");
 		fixRunTasks(hasModuleInfos.get());
 
 		// if target is a multi-release jar, move module definitions into the corresponding subfolder
         if (jigsaw.isMultiRelease()) {
-            JpmsGradlePlugin.trace("creating multi-release jar");
+            JpmsGradlePlugin.trace(jigsaw.isDebug(), "creating multi-release jar");
             multiReleaseJar();
         }
     }
@@ -160,11 +160,13 @@ public class ModuleInfoJava extends DefaultTask {
 	private void fixJavadocTasks(boolean removeModuleInfo) {
 		Project project = getProject();
 
+		JigsawExtension jigsaw = (JigsawExtension) project.getExtensions().getByName("jigsaw");
+
 		// iterate over all Javadoc tasks
         project.getTasks()
         	.withType(Javadoc.class)
         	.forEach(task -> {
-				JpmsGradlePlugin.trace("%s", task);
+				JpmsGradlePlugin.trace(jigsaw.isDebug(), "%s", task);
 
 				if (removeModuleInfo) {
 					// remove module-info.java from input
@@ -173,7 +175,7 @@ public class ModuleInfoJava extends DefaultTask {
 
 						// before executing JavaCompile task, remove module definitions from task input
 						task.doFirst(t -> {
-							JpmsGradlePlugin.trace("remove module def from javadoc input: %s", t);
+							JpmsGradlePlugin.trace(jigsaw.isDebug(), "remove module def from javadoc input: %s", t);
 							task.setSource(inputs.getAsFileTree());
 						});
 				} else {
@@ -181,7 +183,7 @@ public class ModuleInfoJava extends DefaultTask {
 					// TODO cleanup duplicate code
                     String classesDir = task.getOutputs().getFiles().getSingleFile().getPath();
                     String modulepath = classesDir+File.pathSeparator+task.getClasspath().getAsPath();
-					JpmsGradlePlugin.trace("module-path: %s", modulepath.replaceAll(File.pathSeparator, "\n"));
+					JpmsGradlePlugin.trace(jigsaw.isDebug(), "module-path: %s", modulepath.replaceAll(File.pathSeparator, "\n"));
 
 					CoreJavadocOptions options = (CoreJavadocOptions) task.getOptions();
 					options.addStringOption("-module-path", modulepath);
@@ -199,18 +201,20 @@ public class ModuleInfoJava extends DefaultTask {
 
 		Project project = getProject();
 
+		JigsawExtension jigsaw = (JigsawExtension) project.getExtensions().getByName("jigsaw");
+
 		// iterate over all JavaExec tasks
         project.getTasks()
         	.withType(JavaExec.class)
         	.forEach(task -> {
-				JpmsGradlePlugin.trace("%s", task);
+				JpmsGradlePlugin.trace(jigsaw.isDebug(), "%s", task);
 
 				// determine class path entries and prepare module path
 				String classesDir = task.getClasspath().getAsPath();
-				JpmsGradlePlugin.trace("classpath: %s", classesDir);
+				JpmsGradlePlugin.trace(jigsaw.isDebug(), "classpath: %s", classesDir);
 
 				String modulepath = classesDir+File.pathSeparator+task.getClasspath().getAsPath();
-				JpmsGradlePlugin.trace("modulepath: %s", modulepath);
+				JpmsGradlePlugin.trace(jigsaw.isDebug(), "modulepath: %s", modulepath);
 
 				// find out if module path is already specified
 				List<String> args = task.getJvmArgs();
@@ -220,11 +224,11 @@ public class ModuleInfoJava extends DefaultTask {
 					// module path is not specified, add it now
 					args.add(RUN_MODULE_PATH);
 					args.add(modulepath);
-					JpmsGradlePlugin.trace("task '%s': setting module-path to %s", task.getName(), modulepath.replaceAll(File.pathSeparator, "\n"));
+					JpmsGradlePlugin.trace(jigsaw.isDebug(), "task '%s': setting module-path to %s", task.getName(), modulepath.replaceAll(File.pathSeparator, "\n"));
 					task.setJvmArgs(args);
 				} else {
 					// module path is already specified, don't change it
-					JpmsGradlePlugin.trace("task '%s': module-path already set", task.getName());
+					JpmsGradlePlugin.trace(jigsaw.isDebug(), "task '%s': module-path already set", task.getName());
 				}
         	});
 	}
@@ -232,16 +236,18 @@ public class ModuleInfoJava extends DefaultTask {
 	private void multiReleaseJar() {
         Project project = getProject();
 
+		JigsawExtension jigsaw = (JigsawExtension) project.getExtensions().getByName("jigsaw");
+
         // iterate over all Jar tasks
         project.getTasks()
             .withType(Jar.class)
             .forEach(task -> {
-                JpmsGradlePlugin.trace("%s", task);
+                JpmsGradlePlugin.trace(jigsaw.isDebug(), "%s", task);
 
-                JpmsGradlePlugin.trace("Setting Multi-Release attribute in manifest");
+                JpmsGradlePlugin.trace(jigsaw.isDebug(), "Setting Multi-Release attribute in manifest");
                 task.getManifest().getAttributes().put("Multi-Release", "true");
 
-                JpmsGradlePlugin.trace("Fixing paths of module definitions");
+                JpmsGradlePlugin.trace(jigsaw.isDebug(), "Fixing paths of module definitions");
                 task.filesMatching("module-info.class", fileCopyDetails -> {
                     fileCopyDetails.setPath("META-INF/versions/9/"+fileCopyDetails.getName());
                 });

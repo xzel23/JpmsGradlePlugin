@@ -21,12 +21,12 @@ public class JLink extends DefaultTask {
 	public void jlink() {
 		Project project = getProject();
 
+		JigsawExtension jigsaw = (JigsawExtension) project.getExtensions().getByName("jigsaw");
+
 		JavaVersion javaVersion = JavaVersion.current();
 		if (!javaVersion.isJava9Compatible()) {
-			JpmsGradlePlugin.trace("Java version 9 or above required, current version is: "+javaVersion);
+			JpmsGradlePlugin.trace(jigsaw.isDebug(), "Java version 9 or above required, current version is: "+javaVersion);
 		}
-
-		JigsawExtension jigsaw = (JigsawExtension) project.getExtensions().getByName("jigsaw");
 
         String modulePath = TaskHelper.getModulePath(project);
 
@@ -73,7 +73,7 @@ public class JLink extends DefaultTask {
 		// other
 		Collections.addAll(jlinkArgs, "--no-header-files", "--no-man-pages");
 
-		JpmsGradlePlugin.trace("jlink arguments: %s", jlinkArgs);
+		JpmsGradlePlugin.trace(jigsaw.isDebug(), "jlink arguments: %s", jlinkArgs);
 
 		// execute jlink
 		TaskHelper.runTool(TaskHelper.JLINK, project, jlinkArgs);

@@ -30,6 +30,7 @@ import org.gradle.api.file.FileCollection;
 import org.gradle.api.tasks.TaskOutputs;
 import org.gradle.jvm.tasks.Jar;
 
+import com.dua3.gradle.jpms.JigsawExtension;
 import com.dua3.gradle.jpms.JpmsGradlePlugin;
 
 public class TaskHelper {
@@ -53,6 +54,7 @@ public class TaskHelper {
     public static ToolRunner toolRunner(String name, String toolExecutablePathProperty, String toolExecutablePathDefault) {
         String toolFromEnv = System.getProperty(toolExecutablePathProperty, System.getenv(toolExecutablePathProperty));
         final String tool = toolFromEnv==null || toolFromEnv.isBlank() ? toolExecutablePathDefault : toolFromEnv;
+
         JpmsGradlePlugin.trace("Path for tool '%s': %s", name, tool);
 
         return new TaskHelper.ToolRunner() {
@@ -129,8 +131,10 @@ public class TaskHelper {
 	}
 
     static int runTool(ToolRunner tool, Project project, List<String> args) {
-        JpmsGradlePlugin.trace("runTool %s%n%s %s%n", tool, project, String.join(" ", args));
-        
+		JigsawExtension jigsaw = (JigsawExtension) project.getExtensions().getByName("jigsaw");
+
+        JpmsGradlePlugin.trace(jigsaw.isDebug(), "runTool %s%n%s %s%n", tool, project, String.join(" ", args));
+
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         int rc = tool.run(new PrintWriter(out, true), new PrintWriter(out, true), args.toArray(new String[0]));
 
@@ -144,11 +148,11 @@ public class TaskHelper {
                 throw new GradleException(msg);
             }
 
-            JpmsGradlePlugin.trace("tool output:\n%s", compilerOutput);
+            JpmsGradlePlugin.trace(jigsaw.isDebug(), "tool output:\n%s", compilerOutput);
         } catch (UnsupportedEncodingException e) {
             project.getLogger().warn("exception retrieving tool output.", e);
         } finally {
-            JpmsGradlePlugin.trace("tool exit status: %d", rc);
+            JpmsGradlePlugin.trace(jigsaw.isDebug(), "tool exit status: %d", rc);
         }
 
         return rc;

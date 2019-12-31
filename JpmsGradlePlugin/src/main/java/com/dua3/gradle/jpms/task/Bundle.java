@@ -60,7 +60,7 @@ public class Bundle extends DefaultTask {
 		
 		Collections.addAll(args, extraArgs);
 
-        JpmsGradlePlugin.trace("jpackager arguments:%n%n%s %s%n%n", "jpackager", String.join(" ", args));
+        JpmsGradlePlugin.trace(jigsaw.isDebug(), "jpackager arguments:%n%n%s %s%n%n", "jpackager", String.join(" ", args));
 
 		// execute jpackager
 		ToolRunner tool = TaskHelper.JPACKAGER;

@@ -50,7 +50,18 @@ public class JpmsGradlePlugin implements Plugin<Project> {
 	}
 
 	public static void trace(String fmt, Object... args) {
-		trace(String.format(fmt, args));
+		trace(debug, String.format(fmt, args));
+	}
+
+	public static void trace(boolean dbg, Object obj) {
+		String msg = String.valueOf(obj);
+		if (dbg || debug) {
+			System.out.println("[" + pluginname + "] " + msg);
+		}
+	}
+
+	public static void trace(boolean dbg, String fmt, Object... args) {
+		trace(dbg, String.format(fmt, args));
 	}
 
 	public static void trace(Object obj) {
@@ -101,12 +112,6 @@ public class JpmsGradlePlugin implements Plugin<Project> {
 
 		// create extension
 		createJigsawExtension(project);
-
-		// enable debugging
-		JigsawExtension jigsaw = (JigsawExtension) project.getExtensions().getByName("jigsaw");
-		if (jigsaw!=null) {
-			debug = jigsaw.isDebug();
-		}
 
 		// create and automatically add moduleInfo task
 		ModuleInfoJava moduleInfo = addModuleInfoTask(project);

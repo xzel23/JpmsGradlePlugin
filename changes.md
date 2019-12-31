@@ -1,6 +1,11 @@
 Changes
 =======
 
+Version 1.0-BETA7
+-----------------
+
+- fix debug output (jigsaw.debug)
+
 Version 1.0-BETA6
 -----------------
 
