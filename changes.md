@@ -1,6 +1,11 @@
 Changes
 =======
 
+Version 1.0
+-----------
+
+no changes
+
 Version 1.0-BETA7
 -----------------
 
