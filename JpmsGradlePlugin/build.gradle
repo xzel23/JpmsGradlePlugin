@@ -1,17 +1,7 @@
-// publishing to plugins.gradle.org
-buildscript {
-  repositories {
-    maven {
-      url "https://plugins.gradle.org/m2/"
-    }
-  }
-  dependencies {
-    classpath "com.gradle.publish:plugin-publish-plugin:0.12.0"
-  }
-}
-
 // publishing to bintray
 plugins {
+  id "com.gradle.plugin-publish" version "0.12.0"
+  id "java-gradle-plugin"
   id "com.jfrog.bintray" version "1.8.5"
 }
 
@@ -22,37 +12,37 @@ apply plugin: 'eclipse'
 apply plugin: "com.gradle.plugin-publish"
 
 repositories {
-    jcenter()
+  jcenter()
 }
 
 def plugin_version = project.hasProperty('version') ? project.version : "SNAPSHOT"
 
 /////////////////////////////////////////////////////////////////////////////
-    def artifactGroup      = 'com.dua3.gradle.jpms'
-    def artifactVersion    = "${plugin_version}"
-    def artifactName       = 'JpmsGradlePlugin'
-    def mainClass          = "${artifactGroup}.${artifactName}" 
-    
-    ext.moduleName     = artifactGroup 
-    ext.scm            = 'https://github.com/xzel23/JpmsGradlePlugin'
-    ext.repo           = 'public'
-    ext.description    = 'JPMS gradle plugin'
-    
-    ext.developerId    = 'xzel23'
-    ext.developerName  = 'Axel Howind'
-    ext.developerEmail = 'axel@dua3.com'
+  def artifactGroup      = 'com.dua3.gradle.jpms'
+  def artifactVersion    = "${plugin_version}"
+  def artifactName       = 'JpmsGradlePlugin'
+  def mainClass          = "${artifactGroup}.${artifactName}" 
+  
+  ext.moduleName     = artifactGroup 
+  ext.scm            = 'https://github.com/xzel23/JpmsGradlePlugin'
+  ext.repo           = 'public'
+  ext.description    = 'JPMS gradle plugin'
+  
+  ext.developerId    = 'xzel23'
+  ext.developerName  = 'Axel Howind'
+  ext.developerEmail = 'axel@dua3.com'
 /////////////////////////////////////////////////////////////////////////////
 
 project.group = artifactGroup
 project.version = artifactVersion
 
 gradlePlugin {
-    plugins {
-      JpmsGradlePlugin {
-        id = artifactGroup
-        implementationClass = mainClass
-      }
+  plugins {
+    JpmsGradlePlugin {
+      id = artifactGroup
+      implementationClass = mainClass
     }
+  }
 }
 
 sourceCompatibility = 8
@@ -61,15 +51,15 @@ targetCompatibility = 8
 // === MAVEN publication === >
 
 publishing {
-    publications {
-      pluginPublication (MavenPublication) {
-        from            components.java
-        groupId         "${artifactGroup}"
-        artifactId      "${artifactName}"
-        version         "${artifactVersion}"         
-      }
+  publications {
+    pluginPublication (MavenPublication) {
+      from            components.java
+      groupId         "${artifactGroup}"
+      artifactId      "${artifactName}"
+      version         "${artifactVersion}"         
     }
   }
+}
   
 // === plugins.gradle.org === >
 
@@ -80,7 +70,7 @@ pluginBundle {
   tags = ['jpms', 'jigsaw', 'java9', 'java10', 'modules', 'module-info']
 
   plugins {
-    jpmsGradlePlugin {
+    JpmsGradlePlugin {
       id = artifactGroup
       displayName = artifactName
     }
@@ -91,33 +81,32 @@ pluginBundle {
     artifactId     = "${artifactName}"
     version        = "${artifactVersion}"         
   }
-
 }
 
 // === BINTRAY === >
 
 bintray {
-    user = findProperty('BINTRAY_USER') ?: 'NONE'
-    key = findProperty('BINTRAY_KEY') ?: 'NONE'
+  user = findProperty('BINTRAY_USER') ?: 'NONE'
+  key = findProperty('BINTRAY_KEY') ?: 'NONE'
 
-    configurations = ['archives']
+  configurations = ['archives']
 
-    dryRun = false //[Default: false] Whether to run this as dry-run, without deploying
-    publish = false //[Default: false] Whether version should be auto published after an upload    
-    override = true //[Default: false] Whether to override version artifacts already published    
+  dryRun = false //[Default: false] Whether to run this as dry-run, without deploying
+  publish = false //[Default: false] Whether version should be auto published after an upload    
+  override = true //[Default: false] Whether to override version artifacts already published    
 
-    pkg {
-        repo = project.repo
-        name = project.group
-        userOrg = findProperty('BINTRAY_USER_ORG') ?: 'NONE'
-        licenses = ['Apache-2.0']
-        vcsUrl = project.scm
+  pkg {
+    repo = project.repo
+    name = project.group
+    userOrg = findProperty('BINTRAY_USER_ORG') ?: 'NONE'
+    licenses = ['Apache-2.0']
+    vcsUrl = project.scm
 
-	    version {
-	        name = project.version
-	        desc = project.name+version
-	        released  = new Date()
-	        vcsTag = project.version
-	    }
+    version {
+      name = project.version
+      desc = project.name+version
+      released  = new Date()
+      vcsTag = project.version
     }
+  }
 }
