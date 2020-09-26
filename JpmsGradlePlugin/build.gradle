@@ -85,6 +85,13 @@ pluginBundle {
       displayName = artifactName
     }
   }
+
+  mavenCoordinates {
+    groupId = artifactGroup
+    artifactId = artifactName
+    version = artifactVersion
+  }
+
 }
 
 // === BINTRAY === >
