@@ -1,6 +1,12 @@
 Changes
 =======
 
+Version 1.0.1
+-------------
+
+- fix ConcurrentModificationException when using Gradle 6.6+
+- update Gradle wrapper for compiling under JDK 15
+
 Version 1.0
 -----------
 

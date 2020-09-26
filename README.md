@@ -8,11 +8,11 @@ __BREAKING CHANGE:__ the former three extension definitions `moduleInfo`, `jlink
 
 ```
     plugins {
-        id "com.dua3.gradle.jpms" version "0.9.0"
+        id "com.dua3.gradle.jpms" version "1.0.1"
     }
 ```
 
-## Fixing up test task (experimental, new in 0.9)
+## Fixing up test task
 
 For modular JDK 9+ builds, the module under test is patched to include the test classes (best information I have found on this is in this german language article[(https://www.informatik-aktuell.de/entwicklung/programmiersprachen/java-9-das-neue-modulsystem-jigsaw-tutorial.html)].
 

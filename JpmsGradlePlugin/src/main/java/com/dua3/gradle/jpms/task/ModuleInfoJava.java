@@ -19,6 +19,7 @@ package com.dua3.gradle.jpms.task;
 import java.io.File;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.stream.Collectors;
 
 import com.dua3.gradle.jpms.JigsawExtension;
 import org.gradle.api.DefaultTask;
@@ -26,6 +27,7 @@ import org.gradle.api.Project;
 import org.gradle.api.file.FileCollection;
 import org.gradle.api.tasks.JavaExec;
 import org.gradle.api.tasks.TaskAction;
+import org.gradle.api.tasks.TaskCollection;
 import org.gradle.api.tasks.bundling.Jar;
 import org.gradle.api.tasks.compile.JavaCompile;
 import org.gradle.api.tasks.javadoc.Javadoc;
@@ -45,8 +47,10 @@ public class ModuleInfoJava extends DefaultTask {
 		AtomicBoolean hasModuleInfos = new AtomicBoolean(false);
 
 		// iterate over all JavaCompile tasks
-        project.getTasks()
-        	.withType(JavaCompile.class)
+		List<JavaCompile> javaCompileTasks = project.getTasks()
+				.withType(JavaCompile.class).stream().collect(Collectors.toList());
+		
+		javaCompileTasks
         	.forEach(task -> {
 				JpmsGradlePlugin.trace(jigsaw.isDebug(), "%s", task);
 
