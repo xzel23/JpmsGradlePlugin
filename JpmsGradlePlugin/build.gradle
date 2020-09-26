@@ -64,9 +64,9 @@ publishing {
     publications {
       pluginPublication (MavenPublication) {
         from            components.java
-        groupId         artifactGroup
-        artifactId      artifactName
-        version         artifactVersion         
+        groupId         "${artifactGroup}"
+        artifactId      "${artifactName}"
+        version         "${artifactVersion}"         
       }
     }
   }
@@ -87,9 +87,9 @@ pluginBundle {
   }
 
   mavenCoordinates {
-    groupId = artifactGroup
-    artifactId = artifactName
-    version = artifactVersion
+    groupId        = "${artifactGroup}"
+    artifactId     = "${artifactName}"
+    version        = "${artifactVersion}"         
   }
 
 }
