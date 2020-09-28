@@ -2,7 +2,9 @@
 
 This plugin adds some support for the Java Platform Module System (JPMS) to gradle builds.
 
-__BREAKING CHANGE:__ the former three extension definitions `moduleInfo`, `jlink`, and `bundle` have been merged into `jigsaw` since some attributes had to be defined redundantly.
+# Known issues
+
+Javadoc generation may fail with a ClassCastException When using __Gradle 6.4+__. If this occurs, please use Gradle 6.3 instead. I will look into this later.
 
 ## Applying the plugin
 
