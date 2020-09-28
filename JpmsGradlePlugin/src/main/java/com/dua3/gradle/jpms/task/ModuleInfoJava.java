@@ -48,8 +48,7 @@ public class ModuleInfoJava extends DefaultTask {
 		AtomicBoolean hasModuleInfos = new AtomicBoolean(false);
 
 		// iterate over all JavaCompile tasks
-		List<JavaCompile> javaCompileTasks = project.getTasks()
-				.withType(JavaCompile.class).stream().collect(Collectors.toList());
+		List<JavaCompile> javaCompileTasks = new ArrayList<>(project.getTasks().withType(JavaCompile.class));
 		
 		javaCompileTasks
         	.forEach(task -> {

@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.gradle.api.GradleException;
 import org.gradle.api.Project;
@@ -53,7 +54,7 @@ public class TaskHelper {
      
     public static ToolRunner toolRunner(String name, String toolExecutablePathProperty, String toolExecutablePathDefault) {
         String toolFromEnv = System.getProperty(toolExecutablePathProperty, System.getenv(toolExecutablePathProperty));
-        final String tool = toolFromEnv==null || toolFromEnv.isBlank() ? toolExecutablePathDefault : toolFromEnv;
+        final String tool = toolFromEnv==null || toolFromEnv.trim().isEmpty() ? toolExecutablePathDefault : toolFromEnv;
 
         JpmsGradlePlugin.trace("Path for tool '%s': %s", name, tool);
 
@@ -216,8 +217,7 @@ public class TaskHelper {
 		String jmods = System.getProperties().getProperty("java.home") + File.separator + "jmods";
 
         // setup module path - putting it all together
-        String modulePath = Arrays.asList(projectModulePath, dependendyModulePath, jmods)
-            .stream()
+        String modulePath = Stream.of(projectModulePath, dependendyModulePath, jmods)
             .filter(s -> !s.isEmpty())
             .collect(Collectors.joining(File.pathSeparator));
 		return modulePath;
