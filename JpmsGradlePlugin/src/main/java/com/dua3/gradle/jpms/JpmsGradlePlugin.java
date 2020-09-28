@@ -71,18 +71,11 @@ public class JpmsGradlePlugin implements Plugin<Project> {
 		}
 	}
 
-	private static boolean isCompatible(String version) {
-		if ("4.6".compareTo(version) <= 0) {
-			return true;
-		}
-
-		// version is a String (for older gradle versions it's all we have), so check
-		// for Gradle >= 4.10 manually
-		if (version.startsWith("4.1") && version.length() >= 4 && Character.isDigit(version.charAt(3))) {
-			return true;
-		}
-
-		return false;
+	public static boolean isGradleVersionAtLeast(Project project, int major, int minor) {
+		String[] versionParts = project.getGradle().getGradleVersion().split("\\.");
+		int gradleMajor = Integer.parseInt(versionParts[0]);
+		int gradleMinor = versionParts.length>1 ? Integer.parseInt(versionParts[1]) : 0;
+		return gradleMajor>major || (gradleMajor==major && gradleMinor>=minor);
 	}
 
 	/**
@@ -92,12 +85,7 @@ public class JpmsGradlePlugin implements Plugin<Project> {
 	 */
 	@Override
 	public void apply(Project project) {
-		Gradle gradle = project.getGradle();
-		String gradleVersion = gradle.getGradleVersion();
-		trace("gradle version: %s", gradleVersion);
-
-		if (!isCompatible(gradleVersion)) {
-			project.getLogger().warn("Unknown Gradle version: {}", gradleVersion);
+		if (!isGradleVersionAtLeast(project, 4,6)) {
 			project.getLogger().warn("Plugin needs Gradle version 4.6 or above");
 		}
 

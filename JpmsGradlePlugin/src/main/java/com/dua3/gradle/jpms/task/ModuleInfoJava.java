@@ -16,24 +16,25 @@
  */
 package com.dua3.gradle.jpms.task;
 
-import java.io.File;
-import java.util.*;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.stream.Collectors;
-
 import com.dua3.gradle.jpms.JigsawExtension;
+import com.dua3.gradle.jpms.JpmsGradlePlugin;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.Project;
 import org.gradle.api.file.FileCollection;
 import org.gradle.api.tasks.JavaExec;
 import org.gradle.api.tasks.TaskAction;
-import org.gradle.api.tasks.TaskCollection;
 import org.gradle.api.tasks.bundling.Jar;
 import org.gradle.api.tasks.compile.JavaCompile;
 import org.gradle.api.tasks.javadoc.Javadoc;
 import org.gradle.external.javadoc.CoreJavadocOptions;
 
-import com.dua3.gradle.jpms.JpmsGradlePlugin;
+import java.io.File;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.stream.Collectors;
 
 public class ModuleInfoJava extends DefaultTask {
 
@@ -183,14 +184,23 @@ public class ModuleInfoJava extends DefaultTask {
 							task.setSource(inputs.getAsFileTree());
 						});
 				} else {
-					// set module path
-					// TODO cleanup duplicate code
-                    String classesDir = task.getOutputs().getFiles().getSingleFile().getPath();
-                    String modulepath = classesDir+File.pathSeparator+task.getClasspath().getAsPath();
-					JpmsGradlePlugin.trace(jigsaw.isDebug(), "module-path: %s", modulepath.replaceAll(File.pathSeparator, "\n"));
+					// set the module path for Javadoc
+					File moduleDir = new File(task.getOutputs().getFiles().getSingleFile(), task.getClasspath().getAsPath());
 
-					CoreJavadocOptions options = (CoreJavadocOptions) task.getOptions();
-					options.addStringOption("-module-path", modulepath);
+					// Support for setting the module path for Javadoc was added in Gradle 6.4.
+					// For older Gradle versions, the module path can be set by appending a String option,
+					// however that leads to a ClassCastException in Gradle 6.4+, so we need different
+					// approaches dependingon the Gradle version.
+					if (JpmsGradlePlugin.isGradleVersionAtLeast(project, 6, 4)) {
+						List<File> modulePath = new ArrayList<>();
+						modulePath.add(moduleDir);
+						JpmsGradlePlugin.trace(jigsaw.isDebug(), "module-path: %s", modulePath);
+						CoreJavadocOptions options = (CoreJavadocOptions) task.getOptions();
+						options.setModulePath(modulePath);
+					} else {
+						CoreJavadocOptions options = (CoreJavadocOptions) task.getOptions();
+						options.addStringOption("-module-path", moduleDir.getAbsolutePath());						
+					}
 				}
         	});
 	}
