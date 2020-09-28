@@ -8,7 +8,7 @@ __BREAKING CHANGE:__ the former three extension definitions `moduleInfo`, `jlink
 
 ```
     plugins {
-        id "com.dua3.gradle.jpms" version "1.0.1"
+        id "com.dua3.gradle.jpms" version "1.0.2"
     }
 ```
 

@@ -1,6 +1,11 @@
 Changes
 =======
 
+Version 1.0.2
+-------------
+
+- fix ClassCastException in Javadoc task when using Gradle 6.4+
+
 Version 1.0.1
 -------------
 
