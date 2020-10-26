@@ -197,8 +197,11 @@ public class ModuleInfoJava extends DefaultTask {
 						CoreJavadocOptions options = (CoreJavadocOptions) task.getOptions();
 						options.setModulePath(modulePath);
 					} else {
+						String modulePath = moduleDir.getAbsolutePath();
 						CoreJavadocOptions options = (CoreJavadocOptions) task.getOptions();
-						options.addStringOption("-module-path", moduleDir.getAbsolutePath());						
+						JpmsGradlePlugin.trace(jigsaw.isDebug(), "using Gradle pre-6.4 workaround to set module-path");
+						JpmsGradlePlugin.trace(jigsaw.isDebug(), "module-path: %s", modulePath);
+						options.addStringOption("-module-path", modulePath);						
 					}
 				}
         	});

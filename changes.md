@@ -1,6 +1,11 @@
 Changes
 =======
 
+Version 1.0.3
+-------------
+
+- add debug output to help identify incompatibilities with Gradle versions
+
 Version 1.0.2
 -------------
 

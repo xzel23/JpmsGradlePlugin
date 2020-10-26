@@ -10,7 +10,7 @@ Javadoc generation may fail with a ClassCastException When using __Gradle 6.4+__
 
 ```
     plugins {
-        id "com.dua3.gradle.jpms" version "1.0.2"
+        id "com.dua3.gradle.jpms" version "1.0.3"
     }
 ```
 
@@ -142,3 +142,7 @@ If you run into this problem, just put a file called `system.properties` into th
 ## Example project
 
 Have a look at the [fxbrowser](https://github.com/xzel23/fxbrowser) project for an example on how to build a non-trivial standalone application using the plugin.
+
+## Enabling debug output
+
+Set the environment variable `DEBUG_JPMS_GRADLE_PLUGIN`. If you are using Gradle in daemon mode, make sure to stop the daemon after changing the environment.

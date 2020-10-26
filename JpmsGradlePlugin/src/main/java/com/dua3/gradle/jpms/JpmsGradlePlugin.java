@@ -74,6 +74,7 @@ public class JpmsGradlePlugin implements Plugin<Project> {
 		String[] versionParts = project.getGradle().getGradleVersion().split("\\.");
 		int gradleMajor = Integer.parseInt(versionParts[0]);
 		int gradleMinor = versionParts.length>1 ? Integer.parseInt(versionParts[1]) : 0;
+		trace("Gradle version major=%d, minor=%d", gradleMajor, gradleMinor);
 		return gradleMajor>major || (gradleMajor==major && gradleMinor>=minor);
 	}
 
