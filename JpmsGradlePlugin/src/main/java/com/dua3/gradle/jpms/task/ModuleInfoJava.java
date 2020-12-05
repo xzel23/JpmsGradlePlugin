@@ -49,9 +49,7 @@ public class ModuleInfoJava extends DefaultTask {
 
 		// iterate over all JavaCompile tasks
 		List<JavaCompile> javaCompileTasks = new ArrayList<>(project.getTasks().withType(JavaCompile.class));
-		
-		javaCompileTasks
-        	.forEach(task -> {
+		javaCompileTasks.forEach(task -> {
 				JpmsGradlePlugin.trace(jigsaw.isDebug(), "%s", task);
 
 				boolean isTest = task.getName().contains("Test");
@@ -167,9 +165,8 @@ public class ModuleInfoJava extends DefaultTask {
 		JigsawExtension jigsaw = (JigsawExtension) project.getExtensions().getByName("jigsaw");
 
 		// iterate over all Javadoc tasks
-        project.getTasks()
-        	.withType(Javadoc.class)
-        	.forEach(task -> {
+		List<Javadoc> javaDocTasks = new ArrayList<>(project.getTasks().withType(Javadoc.class));
+        javaDocTasks.forEach(task -> {
 				JpmsGradlePlugin.trace(jigsaw.isDebug(), "%s", task);
 
 				if (removeModuleInfo) {
@@ -220,9 +217,8 @@ public class ModuleInfoJava extends DefaultTask {
 		JigsawExtension jigsaw = (JigsawExtension) project.getExtensions().getByName("jigsaw");
 
 		// iterate over all JavaExec tasks
-        project.getTasks()
-        	.withType(JavaExec.class)
-        	.forEach(task -> {
+		List<JavaExec> javaExecTasks = new ArrayList<>(project.getTasks().withType(JavaExec.class));
+		javaExecTasks.forEach(task -> {
 				JpmsGradlePlugin.trace(jigsaw.isDebug(), "%s", task);
 
 				// determine class path entries and prepare module path
@@ -255,9 +251,8 @@ public class ModuleInfoJava extends DefaultTask {
 		JigsawExtension jigsaw = (JigsawExtension) project.getExtensions().getByName("jigsaw");
 
         // iterate over all Jar tasks
-        project.getTasks()
-            .withType(Jar.class)
-            .forEach(task -> {
+		List<Jar> jarTasks = new ArrayList<>(project.getTasks().withType(Jar.class));
+		jarTasks.forEach(task -> {
                 JpmsGradlePlugin.trace(jigsaw.isDebug(), "%s", task);
 
                 JpmsGradlePlugin.trace(jigsaw.isDebug(), "Setting Multi-Release attribute in manifest");

@@ -1,6 +1,11 @@
 Changes
 =======
 
+Version 1.1
+-----------
+
+- fix ConcurrentModificationException when using newer Gradle/JDK versions
+
 Version 1.0.3
 -------------
 

@@ -2,15 +2,11 @@
 
 This plugin adds some support for the Java Platform Module System (JPMS) to gradle builds.
 
-# Known issues
-
-Javadoc generation may fail with a ClassCastException When using __Gradle 6.4+__. If this occurs, please use Gradle 6.3 instead. I will look into this later.
-
 ## Applying the plugin
 
 ```
     plugins {
-        id "com.dua3.gradle.jpms" version "1.0.3"
+        id "com.dua3.gradle.jpms" version "1.1"
     }
 ```
 
