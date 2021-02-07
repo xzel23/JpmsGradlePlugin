@@ -165,8 +165,12 @@ public class JigsawExtension {
         this.packagerArgs = packagerArgs;
     }
 
+    public boolean hasModule() {
+        return !module.isEmpty();
+    }
+    
     public String getModule() {
-        if (module.isEmpty()) {
+        if (!hasModule()) {
             throw new GradleException("jigsaw.module not set!");
         }
         return module;

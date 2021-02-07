@@ -1,6 +1,11 @@
 Changes
 =======
 
+Version 1.1.1
+-------------
+
+ - fix issue with compiling tests when no module name is given
+
 Version 1.1
 -----------
 
