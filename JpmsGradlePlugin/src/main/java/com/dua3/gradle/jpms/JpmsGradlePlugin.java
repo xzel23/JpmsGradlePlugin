@@ -164,8 +164,6 @@ public class JpmsGradlePlugin implements Plugin<Project> {
 							} else {
 								compilerArgs.add("--add-modules");
 								compilerArgs.add(jigsaw.getTestLibraryModule());
-								compilerArgs.add("--add-reads");
-								compilerArgs.add(String.format("%s=%s", jigsaw.getTestLibraryModule()));
 							}
 							options.setCompilerArgs(compilerArgs);
 						}
