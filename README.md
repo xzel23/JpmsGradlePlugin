@@ -4,7 +4,7 @@ This plugin adds some support for the Java Platform Module System (JPMS) to grad
 
 ## NOTE
 
-__Gradle 7.0 introduced full support for Jigsaw modules, so you if you are using Gradle 7 or newer, you probably think about changing your builds to use the modularization support provided by Gradle.__
+__Gradle 7.0 introduced full support for Jigsaw modules, so you if you are using Gradle 7 or newer, you should think about changing your builds to use the modularization support provided by Gradle.__
 
 ## Applying the plugin
 
